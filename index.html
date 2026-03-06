@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assessment Redesign Studio</title>
+    <!-- React & Babel for browser execution -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .transition-sidebar { transition: width 0.3s ease-in-out; }
+        /* Hide scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#FBFBFD] overflow-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Custom Component to handle Lucide Icons in a browser-rendered environment
+        const Icon = ({ name, className = "w-5 h-5" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && iconRef.current) {
+                    window.lucide.createIcons();
+                }
+            }, [name]);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        const App = () => {
+            const [step, setStep] = useState(1);
+            const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+            const [data, setData] = useState({
+                courseName: '', subject: '', learningOutcomes: ['', ''], tasks: [''], 
+                assessmentType: '', integratedSubtype: '', essentialTaskIndices: [], 
+                humanCompetencyStrategy: '', integrityProvisions: '', submissionRequirements: '', 
+                aiUsageGuidelines: '', integrationFocus: '', criticalEngagement: '', 
+            });
+
+            const blueprintRef = useRef(null);
+
+            const updateData = (field, value) => setData(prev => ({ ...prev, [field]: value }));
+            
+            const handleOutcomeChange = (index, value) => {
+                const newOutcomes = [...data.learningOutcomes];
+                newOutcomes[index] = value;
+                updateData('learningOutcomes', newOutcomes);
+            };
+
+            const handleTaskChange = (index, value) => {
+                const newTasks = [...data.tasks];
+                newTasks[index] = value;
+                updateData('tasks', newTasks);
+            };
+
+            const toggleEssential = (index) => {
+                setData(prev => {
+                    const isEssential = prev.essentialTaskIndices.includes(index);
+                    return {
+                        ...prev,
+                        essentialTaskIndices: isEssential 
+                            ? prev.essentialTaskIndices.filter(i => i !== index)
+                            : [...prev.essentialTaskIndices, index]
+                    };
+                });
+            };
+
+            const nextStep = () => step < 8 && setStep(prev => prev + 1);
+            const prevStep = () => setStep(prev => prev - 1);
+
+            const downloadImage = async () => {
+                if (!blueprintRef.current) return;
+                const canvas = await html2canvas(blueprintRef.current);
+                const link = document.createElement('a');
+                link.download = `Blueprint-${data.subject || 'Assessment'}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            };
+
+            const getThemeColor = () => {
+                if (data.assessmentType === 'AI-Free') return { border: 'border-rose-500', bg: 'bg-rose-50', text: 'text-rose-700', banner: 'bg-rose-600' };
+                if (data.assessmentType === 'AI-Assisted') return { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', banner: 'bg-amber-600' };
+                if (data.assessmentType === 'AI-Integrated') return { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', banner: 'bg-emerald-600' };
+                return { border: 'border-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-700', banner: 'bg-indigo-600' };
+            };
+
+            const formatListWithAnd = (items) => {
+                if (items.length === 0) return "";
+                if (items.length === 1) return items[0];
+                return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+            };
+
+            const renderStepContent = () => {
+                switch(step) {
+                    case 1: return (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 1</label>
+                                <h3 className="text-2xl font-bold">Course Identification</h3>
+                                <p className="text-sm text-gray-500">Enter the name of the course for this redesign.</p>
+                            </div>
+                            <input autoFocus className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100" placeholder="e.g., Cost Accounting" value={data.courseName} onChange={e => updateData('courseName', e.target.value)} />
+                        </div>
+                    );
+                    case 2: return (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 2</label>
+                                <h3 className="text-2xl font-bold">Assessment Title</h3>
+                                <p className="text-sm text-gray-500">What is the performance-based assessment?</p>
+                            </div>
+                            <input autoFocus className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100" placeholder="e.g., Cost Analysis Report" value={data.subject} onChange={e => updateData('subject', e.target.value)} />
+                        </div>
+                    );
+                    case 3: return (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 3</label>
+                                <h3 className="text-2xl font-bold">Learning Outcomes</h3>
+                                <p className="text-sm text-gray-500">List the specific CLOs this assessment provides evidence for.</p>
+                            </div>
+                            <div className="space-y-3">
+                                {data.learningOutcomes.map((outcome, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <input className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100" placeholder={`Outcome ${index + 1}...`} value={outcome} onChange={e => handleOutcomeChange(index, e.target.value)} />
+                                        <button onClick={() => updateData('learningOutcomes', data.learningOutcomes.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-rose-500"><Icon name="trash-2" className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                                <button onClick={() => updateData('learningOutcomes', [...data.learningOutcomes, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1"><Icon name="plus" className="w-3 h-3" /> Add Outcome</button>
+                            </div>
+                        </div>
+                    );
+                    case 4: return (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 4</label>
+                                <h3 className="text-2xl font-bold">Task Breakdown</h3>
+                                <p className="text-sm text-gray-500">List the tasks required to complete the assessment.</p>
+                            </div>
+                            <div className="space-y-3">
+                                {data.tasks.map((task, index) => (
+                                    <div key={index} className="flex gap-2">
+                                        <input className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100" placeholder={`Task ${index + 1}...`} value={task} onChange={e => handleTaskChange(index, e.target.value)} />
+                                        <button onClick={() => updateData('tasks', data.tasks.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-rose-500"><Icon name="trash-2" className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                                <button onClick={() => updateData('tasks', [...data.tasks, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1"><Icon name="plus" className="w-3 h-3" /> Add Task</button>
+                            </div>
+                        </div>
+                    );
+                    case 5: return (
+                        <div className="space-y-8 pb-10">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 5</label>
+                                <h3 className="text-2xl font-bold">Categorize the Assessment</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {[
+                                    { id: 'AI-Free', icon: 'shield-alert', title: 'AI-Free', guide: "Do students apply the intended outcomes in all these tasks?" },
+                                    { id: 'AI-Assisted', icon: 'zap', title: 'AI-Assisted', guide: "Do students apply the intended outcomes in some tasks but not all?" },
+                                    { id: 'AI-Integrated', icon: 'brain-circuit', title: 'AI-Integrated', guide: "Is AI already integrated in the professional field?" }
+                                ].map(p => (
+                                    <button key={p.id} onClick={() => updateData('assessmentType', p.id)} className={`p-6 rounded-3xl border-2 text-left transition-all ${data.assessmentType === p.id ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-100 bg-white hover:border-indigo-200'}`}>
+                                        <Icon name={p.icon} className="mb-4 w-6 h-6" />
+                                        <h4 className="font-bold mb-2">{p.title}</h4>
+                                        <p className="text-[11px] opacity-80">{p.guide}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                    case 6:
+                        if (data.assessmentType === 'AI-Free') return (
+                            <div className="space-y-6">
+                                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl">
+                                    <p className="text-sm text-rose-900 font-medium">This is an <strong>AI-Free assessment</strong>. Please select the primary strategy to ensure personal performance.</p>
+                                </div>
+                                <div className="grid grid-cols-1 gap-4">
+                                    {['Proctoring', 'Validation (Oral/Viva)', 'Documentation'].map(s => (
+                                        <button key={s} onClick={() => updateData('humanCompetencyStrategy', s)} className={`p-5 rounded-2xl border-2 text-left ${data.humanCompetencyStrategy === s ? 'border-rose-600 bg-rose-50' : 'bg-white border-gray-100'}`}>
+                                            <span className="text-sm font-bold">{s}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                        if (data.assessmentType === 'AI-Assisted') return (
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-bold">Select Core Human Tasks</h3>
+                                <p className="text-sm text-gray-500">Where must students apply outcomes without AI?</p>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {data.tasks.map((task, index) => task.trim() && (
+                                        <button key={index} onClick={() => toggleEssential(index)} className={`p-4 rounded-xl border-2 text-left flex justify-between ${data.essentialTaskIndices.includes(index) ? 'border-amber-600 bg-amber-50' : 'bg-white'}`}>
+                                            <span className="text-sm font-bold">{task}</span>
+                                            {data.essentialTaskIndices.includes(index) && <Icon name="check-circle-2" className="text-amber-600" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                        return (
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-bold">Integration Path</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button onClick={() => updateData('integratedSubtype', 'ObjectOfStudy')} className={`p-6 rounded-2xl border-2 ${data.integratedSubtype === 'ObjectOfStudy' ? 'border-emerald-600 bg-emerald-50' : 'bg-white'}`}>AI as Object of Study</button>
+                                    <button onClick={() => updateData('integratedSubtype', 'Collaborator')} className={`p-6 rounded-2xl border-2 ${data.integratedSubtype === 'Collaborator' ? 'border-emerald-600 bg-emerald-50' : 'bg-white'}`}>AI as Collaborator</button>
+                                </div>
+                            </div>
+                        );
+                    case 7: return (
+                        <div className="space-y-6">
+                            <h3 className="text-2xl font-bold">Accountability Details</h3>
+                            <textarea className="w-full h-32 p-4 border rounded-2xl" placeholder="Implementation details for integrity..." value={data.integrityProvisions} onChange={e => updateData('integrityProvisions', e.target.value)} />
+                            <textarea className="w-full h-32 p-4 border rounded-2xl" placeholder="Critical engagement requirements..." value={data.criticalEngagement} onChange={e => updateData('criticalEngagement', e.target.value)} />
+                        </div>
+                    );
+                    case 8: {
+                        const theme = getThemeColor();
+                        const auxiliaryTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
+                        const coreTasksNames = data.essentialTaskIndices.map(i => data.tasks[i]).join(", ");
+                        
+                        const policyText = data.assessmentType === 'AI-Free' 
+                            ? `This is an AI-FREE ASSESSMENT. The use of AI is prohibited. To ensure your personal performance: ${data.integrityProvisions}`
+                            : data.assessmentType === 'AI-Assisted' 
+                                ? `This is an AI-ASSISTED ASSESSMENT. You are allowed to use AI to: ${formatListWithAnd(auxiliaryTasks)}. AI is prohibited for: ${coreTasksNames}. To ensure mastery: ${data.integrityProvisions}`
+                                : `This is an AI-INTEGRATED ASSESSMENT. To ensure mastery: ${data.integrityProvisions}. ${data.criticalEngagement}`;
+
+                        return (
+                            <div className="space-y-6 pb-20">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-2xl font-bold">Final Blueprint</h3>
+                                    <button onClick={downloadImage} className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-lg">Download PNG</button>
+                                </div>
+                                <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl`}>
+                                    <div className={`${theme.banner} p-8 text-white`}>
+                                        <p className="text-xs font-black uppercase tracking-widest opacity-70">Design Blueprint</p>
+                                        <h4 className="text-2xl font-bold mt-1">{data.courseName || 'Course'}</h4>
+                                        <p className="font-medium opacity-90">{data.subject || 'Assessment'}</p>
+                                    </div>
+                                    <div className="p-8 space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-4 border rounded-xl bg-gray-50">
+                                                <p className="text-[10px] font-black uppercase text-gray-400 mb-2">Target CLOs</p>
+                                                <p className="text-xs font-bold">{data.learningOutcomes.filter(o => o.trim()).join("; ")}</p>
+                                            </div>
+                                            <div className="p-4 border rounded-xl bg-gray-50">
+                                                <p className="text-[10px] font-black uppercase text-gray-400 mb-2">Strategy</p>
+                                                <p className="text-xs font-bold">{data.humanCompetencyStrategy || data.assessmentType}</p>
+                                            </div>
+                                        </div>
+                                        <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-xl">
+                                            <p className="text-[10px] font-black uppercase text-indigo-600 mb-2">Syllabus Statement</p>
+                                            <p className="text-xs font-medium leading-relaxed">{policyText}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    }
+                    default: return null;
+                }
+            };
+
+            return (
+                <div className="h-screen flex flex-col">
+                    <nav className="h-16 border-b bg-white px-6 flex items-center justify-between shrink-0 shadow-sm z-50">
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><Icon name={isSidebarOpen ? "chevron-left" : "chevron-right"} /></button>
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center"><Icon name="brain-circuit" className="text-white w-5 h-5" /></div>
+                                <span className="font-black text-indigo-950 tracking-tight uppercase text-sm">AI-Adaptive Studio</span>
+                            </div>
+                        </div>
+                        <div className="w-48 h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${(step / 8) * 100}%` }} /></div>
+                    </nav>
+
+                    <div className="flex flex-1 overflow-hidden">
+                        <aside className={`bg-white border-r transition-sidebar flex flex-col overflow-hidden ${isSidebarOpen ? 'w-80' : 'w-0'}`}>
+                            <div className="p-6 flex-1 overflow-y-auto space-y-8 min-w-[320px] no-scrollbar">
+                                <div className="space-y-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Course</label>
+                                        <p className="text-sm font-bold text-gray-800 line-clamp-1">{data.courseName || '---'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</label>
+                                        <div className="mt-1"><span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-100 text-indigo-600">{data.assessmentType || 'Pending'}</span></div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 border-t pt-4">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Learning Outcomes</label>
+                                    {data.learningOutcomes.filter(o => o.trim()).map((o, i) => <p key={i} className="text-[11px] font-medium text-gray-600 leading-tight">• {o}</p>)}
+                                </div>
+                                <div className="space-y-2 border-t pt-4">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tasks</label>
+                                    {data.tasks.filter(t => t.trim()).map((t, i) => <p key={i} className="text-[11px] font-medium text-gray-600 leading-tight">• {t}</p>)}
+                                </div>
+                            </div>
+                        </aside>
+
+                        <main className="flex-1 overflow-y-auto bg-white">
+                            <div className="max-w-3xl mx-auto px-8 py-16">
+                                {renderStepContent()}
+                                {step < 8 && (
+                                    <div className="mt-12 flex items-center justify-between pt-8 border-t">
+                                        <button onClick={prevStep} disabled={step === 1} className={`font-bold transition-all ${step === 1 ? 'opacity-0' : 'text-gray-400 hover:text-gray-900'}`}>Back</button>
+                                        <button onClick={nextStep} className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">Next Step <Icon name="arrow-right" className="w-4 h-4" /></button>
+                                    </div>
+                                )}
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
