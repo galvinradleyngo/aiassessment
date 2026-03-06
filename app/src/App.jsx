@@ -568,6 +568,7 @@ const App = () => {
               </div>
             </div>
 
+            {/* Changed from `shadow-xl p-1` to `shadow-xl` below to fix the gap issue */}
             <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl`}>
               <div className={`${theme.banner} p-6 text-white`}>
                 <div className="flex justify-between items-start">
