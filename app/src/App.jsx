@@ -1,0 +1,744 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  ShieldCheck, 
+  Zap, 
+  BrainCircuit, 
+  Eye, 
+  ArrowRight, 
+  CheckCircle2,
+  Scale,
+  RotateCcw,
+  Plus,
+  Trash2,
+  Info,
+  MessageSquare,
+  AlertTriangle,
+  ChevronRight,
+  ChevronLeft,
+  LayoutDashboard,
+  BookOpen,
+  Target,
+  HelpCircle,
+  Download,
+  FileText,
+  Copy,
+  UserCheck,
+  ShieldAlert,
+  Users,
+  Search,
+  ListTodo
+} from 'lucide-react';
+
+// For image export
+const html2canvasScript = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+
+const App = () => {
+  const [step, setStep] = useState(1);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [data, setData] = useState({
+    courseName: '',
+    subject: '',
+    learningOutcomes: ['', ''], 
+    tasks: [''], 
+    assessmentType: '', 
+    integratedSubtype: '', // 'ObjectOfStudy' or 'Collaborator'
+    essentialTaskIndices: [], 
+    aiLiteracyReasoning: '',
+    humanCompetencyStrategy: '', 
+    integrityProvisions: '',
+    submissionRequirements: '', 
+    aiUsageGuidelines: '', 
+    integrationFocus: '',
+    criticalEngagement: '', 
+  });
+
+  const blueprintRef = useRef(null);
+
+  const updateData = (field, value) => {
+    setData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleOutcomeChange = (index, value) => {
+    const newOutcomes = [...data.learningOutcomes];
+    newOutcomes[index] = value;
+    setData(prev => ({ ...prev, learningOutcomes: newOutcomes }));
+  };
+
+  const handleTaskChange = (index, value) => {
+    const newTasks = [...data.tasks];
+    newTasks[index] = value;
+    setData(prev => ({ ...prev, tasks: newTasks }));
+  };
+
+  const toggleEssential = (index) => {
+    setData(prev => {
+      const isEssential = prev.essentialTaskIndices.includes(index);
+      return {
+        ...prev,
+        essentialTaskIndices: isEssential 
+          ? prev.essentialTaskIndices.filter(i => i !== index)
+          : [...prev.essentialTaskIndices, index]
+      };
+    });
+  };
+
+  const nextStep = () => {
+    if (step >= 8) return;
+    setStep(prev => prev + 1);
+  };
+  
+  const prevStep = () => setStep(prev => prev - 1);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+          if (step < 8 && step !== 5 && step !== 6) {
+            e.preventDefault();
+            nextStep();
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [step, data.assessmentType]);
+
+  const downloadImage = async () => {
+    if (!blueprintRef.current) return;
+    const canvas = await window.html2canvas(blueprintRef.current);
+    const link = document.createElement('a');
+    link.download = `Blueprint-${data.subject || 'Assessment'}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+  };
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = html2canvasScript;
+    document.head.appendChild(script);
+  }, []);
+
+  const getThemeColor = () => {
+    if (data.assessmentType === 'AI-Free') return { border: 'border-rose-500', bg: 'bg-rose-50', text: 'text-rose-700', banner: 'bg-rose-600' };
+    if (data.assessmentType === 'AI-Assisted') return { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', banner: 'bg-amber-600' };
+    if (data.assessmentType === 'AI-Integrated') return { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', banner: 'bg-emerald-600' };
+    return { border: 'border-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-700', banner: 'bg-indigo-600' };
+  };
+
+  const formatListWithAnd = (items) => {
+    if (items.length === 0) return "";
+    if (items.length === 1) return items[0];
+    const lastItem = items[items.length - 1];
+    const otherItems = items.slice(0, items.length - 1);
+    return `${otherItems.join(", ")} and ${lastItem}`;
+  };
+
+  const renderStepContent = () => {
+    switch(step) {
+      case 1:
+        return (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 1</label>
+              <h3 className="text-2xl font-bold text-gray-900">Course Identification</h3>
+              <p className="text-sm text-gray-500">Enter the name of the course for this redesign.</p>
+            </div>
+            <input 
+              autoFocus
+              className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="e.g., Cost Accounting"
+              value={data.courseName}
+              onChange={(e) => updateData('courseName', e.target.value)}
+            />
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 2</label>
+              <h3 className="text-2xl font-bold text-gray-900">Assessment Title</h3>
+              <p className="text-sm text-gray-500">What is the performance-based assessment?</p>
+            </div>
+            <input 
+              autoFocus
+              className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="e.g., Cost Analysis Report"
+              value={data.subject}
+              onChange={(e) => updateData('subject', e.target.value)}
+            />
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 3</label>
+              <h3 className="text-2xl font-bold text-gray-900">Learning Outcomes</h3>
+              <p className="text-sm text-gray-500">List the specific CLOs this assessment provides evidence for.</p>
+            </div>
+            <div className="space-y-3">
+              {data.learningOutcomes.map((outcome, index) => (
+                <div key={index} className="flex gap-2">
+                  <input 
+                    className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder={`Outcome ${index + 1}...`}
+                    value={outcome}
+                    onChange={(e) => handleOutcomeChange(index, e.target.value)}
+                  />
+                  {data.learningOutcomes.length > 1 && (
+                    <button onClick={() => updateData('learningOutcomes', data.learningOutcomes.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-rose-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button onClick={() => updateData('learningOutcomes', [...data.learningOutcomes, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                <Plus className="w-3 h-3" /> Add Outcome
+              </button>
+            </div>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 4</label>
+              <h3 className="text-2xl font-bold text-gray-900">Task Breakdown</h3>
+              <p className="text-sm text-gray-500">List the tasks required to complete the assessment.</p>
+            </div>
+            <div className="space-y-3">
+              {data.tasks.map((task, index) => (
+                <div key={index} className="flex gap-2">
+                  <input 
+                    className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder={`Task ${index + 1}...`}
+                    value={task}
+                    onChange={(e) => handleTaskChange(index, e.target.value)}
+                  />
+                  {data.tasks.length > 1 && (
+                    <button onClick={() => updateData('tasks', data.tasks.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-rose-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button onClick={() => updateData('tasks', [...data.tasks, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                <Plus className="w-3 h-3" /> Add Task
+              </button>
+            </div>
+          </div>
+        );
+      case 5:
+        return (
+          <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 5: Strategic Choice</label>
+                <h3 className="text-2xl font-bold text-gray-900">Categorize the Assessment</h3>
+              </div>
+              
+              <div className="bg-white border border-indigo-100 rounded-2xl p-4 shadow-sm max-w-sm w-full">
+                <div className="flex items-center gap-2 mb-2">
+                  <ListTodo className="w-3 h-3 text-indigo-600" />
+                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Current Tasks</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {data.tasks.filter(t => t.trim()).map((t, i) => (
+                    <span key={i} className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-md border border-indigo-100">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { 
+                  id: 'AI-Free', icon: <ShieldAlert className="w-6 h-6" />, title: 'AI-Free', guide: "Do students apply the intended outcomes in all these tasks?",
+                  color: 'border-rose-200 hover:border-rose-400 bg-rose-50/50', activeColor: 'border-rose-600 bg-rose-600 text-white'
+                },
+                { 
+                  id: 'AI-Assisted', icon: <Zap className="w-6 h-6" />, title: 'AI-Assisted', guide: "Do students apply the intended outcomes in some tasks but not all?",
+                  color: 'border-amber-200 hover:border-amber-400 bg-amber-50/50', activeColor: 'border-amber-600 bg-amber-600 text-white'
+                },
+                { 
+                  id: 'AI-Integrated', icon: <BrainCircuit className="w-6 h-6" />, title: 'AI-Integrated', guide: "Is AI already integrated in the professional field or authentic situations where the learning outcomes are applied?",
+                  color: 'border-emerald-200 hover:border-emerald-400 bg-emerald-50/50', activeColor: 'border-emerald-600 bg-emerald-600 text-white'
+                }
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => updateData('assessmentType', p.id)}
+                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col h-full ${data.assessmentType === p.id ? p.activeColor : p.color}`}
+                >
+                  <div className="mb-4">{p.icon}</div>
+                  <h4 className="font-bold text-base mb-2">{p.title}</h4>
+                  <p className="text-[11px] leading-relaxed font-medium opacity-90">{p.guide}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      case 6:
+        if (data.assessmentType === 'AI-Free') {
+          return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-rose-600 uppercase tracking-widest">Step 6: AI-Free Confirmation</label>
+                <h3 className="text-2xl font-bold text-gray-900">Integrity & Performance</h3>
+                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl space-y-4">
+                  <p className="text-sm text-rose-900 leading-relaxed font-medium">
+                    Since this is an <strong>AI-Free assessment</strong>, students are prohibited from using AI in all tasks. 
+                    Please select the primary strategy to ensure that they perform them personally.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
+                  { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
+                  { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
+                ].map(strategy => (
+                  <button 
+                    key={strategy.id}
+                    onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
+                    className={`p-5 rounded-2xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-rose-600 bg-rose-50' : 'border-gray-100 bg-white hover:border-rose-200'}`}
+                  >
+                    <span className="text-sm font-bold text-rose-800">{strategy.title}</span>
+                    <span className="text-xs text-rose-600/70">{strategy.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        if (data.assessmentType === 'AI-Integrated') {
+          return (
+            <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Step 6: Integration Path</label>
+                <h3 className="text-2xl font-bold text-gray-900">Select Integration Type</h3>
+                <p className="text-sm text-gray-500">How is AI being utilized in this specific disciplinary context?</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <button
+                  onClick={() => updateData('integratedSubtype', 'ObjectOfStudy')}
+                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 ${data.integratedSubtype === 'ObjectOfStudy' ? 'border-emerald-600 bg-emerald-50' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
+                >
+                  <Search className={`w-6 h-6 ${data.integratedSubtype === 'ObjectOfStudy' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                  <div>
+                    <h4 className="font-bold text-gray-900">AI as Object of Study</h4>
+                    <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
+                      AI use is prevalent in the field; CLOs require students to <strong>analyze and evaluate</strong> AI's role. 
+                      Domain-based AI literacy is a primary goal (e.g., evaluating AI ethics in life choices).
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => updateData('integratedSubtype', 'Collaborator')}
+                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 ${data.integratedSubtype === 'Collaborator' ? 'border-emerald-600 bg-emerald-50' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
+                >
+                  <Users className={`w-6 h-6 ${data.integratedSubtype === 'Collaborator' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                  <div>
+                    <h4 className="font-bold text-gray-900">AI as Collaborator</h4>
+                    <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
+                      AI is <strong>weaved into the professional workflow</strong> of performing job-critical tasks.
+                      The focus is on augmented productivity and professional output (e.g., scriptwriting to production).
+                    </p>
+                  </div>
+                </button>
+              </div>
+              {data.integratedSubtype && (
+                <div className="mt-6 space-y-2 animate-in slide-in-from-top-4">
+                  <p className="text-sm font-bold text-gray-700">Specific focus of this integration:</p>
+                  <textarea 
+                    className="w-full h-32 p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-100 text-sm"
+                    placeholder={data.integratedSubtype === 'ObjectOfStudy' ? "e.g., Evaluating the reliability of AI-generated legal advice in common law..." : "e.g., Using generative AI for iterative code refactoring and technical documentation..."}
+                    value={data.integrationFocus}
+                    onChange={(e) => updateData('integrationFocus', e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        }
+        return (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-amber-600 uppercase tracking-widest">Step 6: Task Alignment</label>
+              <h3 className="text-2xl font-bold text-gray-900">Select Core Human Tasks</h3>
+              <p className="text-sm text-gray-500">Select the tasks where students <strong>must</strong> apply the CLOs without AI assistance.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              {data.tasks.map((task, index) => task.trim() && (
+                <button
+                  key={index}
+                  onClick={() => toggleEssential(index)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${data.essentialTaskIndices.includes(index) ? 'border-amber-600 bg-amber-50' : 'border-gray-100 bg-white'}`}
+                >
+                  <span className="text-sm font-bold">{task}</span>
+                  {data.essentialTaskIndices.includes(index) && <CheckCircle2 className="w-4 h-4 text-amber-600" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      case 7:
+        if (data.assessmentType === 'AI-Integrated') {
+          return (
+            <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Step 7: Accountability</label>
+                <h3 className="text-2xl font-bold text-gray-900">Human-in-the-Loop Measures</h3>
+                <p className="text-sm text-gray-500">How will student mastery be assessed in this integrated environment?</p>
+              </div>
+              <div className="space-y-6">
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <p className="text-xs font-bold text-emerald-800 mb-2">Required Submission Components:</p>
+                  <textarea 
+                    className="w-full h-32 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
+                    placeholder={data.integratedSubtype === 'ObjectOfStudy' ? "e.g., Comparative analysis of AI outputs, critique of AI bias, documented evaluation of AI reliability..." : "e.g., Prompt logs, version history showing human intervention, reflection on how AI influenced the professional workflow..."}
+                    value={data.submissionRequirements}
+                    onChange={(e) => updateData('submissionRequirements', e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
+                      { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
+                      { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
+                    ].map(strategy => (
+                      <button 
+                        key={strategy.id}
+                        onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-emerald-600 bg-emerald-50' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
+                      >
+                        <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
+                        <span className="text-[11px] text-gray-500">{strategy.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-sm font-bold text-gray-700 mt-2">Integrity & Authenticity Implementation Details:</p>
+                  <textarea 
+                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
+                    placeholder="Describe exactly how this verification will be managed..."
+                    value={data.integrityProvisions}
+                    onChange={(e) => updateData('integrityProvisions', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                   <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
+                   <textarea 
+                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
+                    placeholder="How will students ensure they aren't just following AI blindly? (e.g., critical reflection on AI errors...)"
+                    value={data.criticalEngagement}
+                    onChange={(e) => updateData('criticalEngagement', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        }
+        const essentialTasks = data.essentialTaskIndices.map(i => data.tasks[i]);
+        const nonEssentialTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
+
+        return (
+          <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+             <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 7: Safeguards & Usage</label>
+                <h3 className="text-2xl font-bold text-gray-900">Integrity & AI Guidelines</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                  <p className="text-[10px] font-black uppercase text-indigo-600 tracking-widest mb-2">
+                    {data.assessmentType === 'AI-Free' ? 'Full Scope of Human Work' : 'Core Human Tasks (No AI)'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {data.assessmentType === 'AI-Free' 
+                      ? data.tasks.filter(t => t.trim()).map((t, i) => (
+                        <span key={i} className="px-2 py-1 bg-white rounded border border-rose-200 text-xs font-bold text-rose-700">{t}</span>
+                      ))
+                      : essentialTasks.map((t, i) => (
+                        <span key={i} className="px-2 py-1 bg-white rounded border border-amber-200 text-xs font-bold text-amber-700">{t}</span>
+                      ))
+                    }
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
+                      { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
+                      { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
+                    ].map(strategy => (
+                      <button 
+                        key={strategy.id}
+                        onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:border-indigo-200'}`}
+                      >
+                        <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
+                        <span className="text-[11px] text-gray-500">{strategy.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
+                  <textarea 
+                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder="Describe exactly how this verification will be managed..."
+                    value={data.integrityProvisions}
+                    onChange={(e) => updateData('integrityProvisions', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {data.assessmentType === 'AI-Assisted' && (
+                <div className="space-y-6 border-t border-gray-100 pt-6">
+                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-2">AI-Permitted Tasks:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {nonEssentialTasks.length > 0 ? nonEssentialTasks.map((t, i) => (
+                        <span key={i} className="px-2 py-1 bg-white rounded border border-emerald-200 text-xs font-bold">{t}</span>
+                      )) : <span className="text-xs text-emerald-600 italic">None selected</span>}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-bold text-gray-700">Describe how students will use AI in these specific tasks:</p>
+                    <textarea 
+                      className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                      placeholder="e.g., 'May use AI for brainstorming but must cite it'..."
+                      value={data.aiUsageGuidelines}
+                      onChange={(e) => updateData('aiUsageGuidelines', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 bg-indigo-50/30 p-4 rounded-2xl border border-indigo-100/50">
+                    <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
+                    <p className="text-[11px] text-gray-500 mb-2 leading-tight">How will you ensure students critically evaluate AI outputs in the permitted tasks?</p>
+                    <textarea 
+                      className="w-full h-24 p-3 border rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-100"
+                      placeholder="e.g., Requiring a critique of AI's reasoning or identifying hallucinated facts..."
+                      value={data.criticalEngagement}
+                      onChange={(e) => updateData('criticalEngagement', e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      case 8:
+        const theme = getThemeColor();
+        const coreTasksNames = data.essentialTaskIndices.map(i => data.tasks[i]).join(", ");
+        const auxiliaryTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
+        const outcomesList = data.learningOutcomes.filter(o => o.trim()).join("; ");
+        
+        const getPolicyText = () => {
+          if (data.assessmentType === 'AI-Free') {
+            return `This is an AI-FREE ASSESSMENT. The use of AI is prohibited. It is critical that you are able to do this unaided by AI, since this provides evidence of the following Course Learning Outcomes: ${outcomesList || '[CLOs]'}.\n\nTo ensure your personal performance: ${data.integrityProvisions || '[Implementation details]'}`;
+          }
+          if (data.assessmentType === 'AI-Assisted') {
+            const tasksString = formatListWithAnd(auxiliaryTasks);
+            return `This is an AI-ASSISTED ASSESSMENT. You are allowed to use AI to: ${tasksString || '[tasks]'}. However, the use of AI is strictly prohibited for the following core tasks: ${coreTasksNames || '[tasks]'}.\n\nYour independent performance of these core tasks will be verified as follows: ${data.integrityProvisions || '[Implementation details]'}. ${data.criticalEngagement ? `\n\nYou are also expected to demonstrate critical engagement with AI outputs: ${data.criticalEngagement}` : ''}`;
+          }
+          return `This is an AI-INTEGRATED ASSESSMENT. AI is utilised for ${data.integrationFocus || 'all tasks'}. To demonstrate Course Learning Outcomes, you must provide the following accountability evidence: ${data.submissionRequirements}. \n\nTo ensure mastery: ${data.integrityProvisions}. ${data.criticalEngagement ? `\n\nRequirement for critical engagement: ${data.criticalEngagement}` : ''}`;
+        };
+
+        return (
+          <div className="space-y-8 animate-in zoom-in-95 duration-500 pb-20">
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight">Final Blueprint</h3>
+              <div className="flex gap-2">
+                <button onClick={() => setStep(1)} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-200">
+                  <RotateCcw className="w-4 h-4" /> Restart
+                </button>
+                <button onClick={downloadImage} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg hover:bg-indigo-700 transition-colors">
+                  <Download className="w-4 h-4" /> Save Image
+                </button>
+              </div>
+            </div>
+
+            <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl p-1`}>
+              <div className={`${theme.banner} p-6 text-white`}>
+                <div className="flex justify-between items-start">
+                  <div className="max-w-[70%]">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Assessment Design Blueprint</p>
+                    <h4 className="text-xl font-bold leading-tight mt-1">AI-Adaptive Assessment Blueprint</h4>
+                    <p className="text-xs font-bold opacity-90 mt-1">{data.courseName || 'Course'}: {data.subject || 'Assessment'}</p>
+                  </div>
+                  <div className="bg-white/20 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30 text-center">
+                    {data.assessmentType} {data.integratedSubtype === 'ObjectOfStudy' ? '(Object of Study)' : data.integratedSubtype === 'Collaborator' ? '(Collaborator)' : ''}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-8 space-y-6 bg-white">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Target Outcomes</p>
+                    <ul className="space-y-2">
+                      {data.learningOutcomes.filter(o => o.trim()).map((o, i) => (
+                        <li key={i} className="text-xs font-semibold text-gray-700 leading-relaxed">• {o}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Integrity Strategy</p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-[9px] font-black text-gray-400 uppercase">Verification Approach:</p>
+                        <p className="text-xs font-bold text-gray-700">{data.integrityProvisions || 'Defined in policy'}</p>
+                      </div>
+                      {data.criticalEngagement && (
+                        <div>
+                          <p className="text-[9px] font-black text-gray-400 uppercase">Critical Engagement:</p>
+                          <p className="text-[10px] text-gray-600 font-medium line-clamp-3">{data.criticalEngagement}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`p-6 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="w-4 h-4 text-indigo-600" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Syllabus Statement Preview (Student-Facing)</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed font-medium whitespace-pre-wrap">
+                    {getPolicyText()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FBFBFD] text-[#1D1D1F] font-sans flex flex-col">
+      <nav className="h-16 border-b border-gray-200 bg-white sticky top-0 z-50 px-6 flex items-center justify-between w-full shadow-sm">
+        <div className="flex items-center gap-4">
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-50 rounded-lg text-gray-400 transition-colors">
+            {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+              <BrainCircuit className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-extrabold text-base tracking-tight uppercase text-indigo-950">AI-Adaptive Studio</span>
+          </div>
+        </div>
+        <div className="h-1.5 w-48 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(step / 8) * 100}%` }} />
+        </div>
+      </nav>
+
+      <div className="flex flex-1 overflow-hidden">
+        <aside className={`bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'w-80' : 'w-0'}`}>
+          <div className="p-6 flex-1 overflow-y-auto space-y-8 min-w-[320px]">
+            <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+              <LayoutDashboard className="w-4 h-4 text-indigo-600" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Blueprint Snapshot</span>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Course</label>
+                  <p className="text-sm font-bold text-gray-800 line-clamp-1">{data.courseName || '...'}</p>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assessment</label>
+                  <p className="text-sm font-bold text-gray-800 line-clamp-1">{data.subject || '...'}</p>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</label>
+                  <div className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${data.assessmentType === 'AI-Free' ? 'bg-rose-100 text-rose-600' : data.assessmentType === 'AI-Assisted' ? 'bg-amber-100 text-amber-600' : data.assessmentType === 'AI-Integrated' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
+                    {data.assessmentType || 'Pending'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-4 border-t border-gray-50">
+                <div className="flex items-center gap-2">
+                  <Target className="w-3 h-3 text-indigo-600" />
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CLOs</label>
+                </div>
+                <div className="space-y-1">
+                  {data.learningOutcomes.filter(o => o.trim()).length > 0 ? (
+                    data.learningOutcomes.filter(o => o.trim()).map((o, i) => (
+                      <p key={i} className="text-[11px] font-medium text-gray-600 leading-tight border-l-2 border-indigo-100 pl-2 py-0.5">{o}</p>
+                    ))
+                  ) : (
+                    <p className="text-[11px] italic text-gray-300">None added yet</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-4 border-t border-gray-50">
+                <div className="flex items-center gap-2">
+                  <ListTodo className="w-3 h-3 text-indigo-600" />
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tasks</label>
+                </div>
+                <div className="space-y-1">
+                  {data.tasks.filter(t => t.trim()).length > 0 ? (
+                    data.tasks.filter(t => t.trim()).map((t, i) => {
+                      const isEssential = data.assessmentType === 'AI-Free' || data.essentialTaskIndices.includes(data.tasks.indexOf(t));
+                      const taskColor = data.assessmentType === 'AI-Free' ? 'border-rose-300 bg-rose-50/50' : 'border-amber-400 bg-amber-50/50';
+                      const label = data.assessmentType === 'AI-Free' ? '(Human)' : '(Core)';
+                      
+                      return (
+                        <p key={i} className={`text-[11px] font-medium leading-tight border-l-2 pl-2 py-0.5 ${isEssential ? taskColor : 'border-gray-100 text-gray-600'}`}>
+                          {t}
+                          {isEssential && <span className={`ml-2 text-[8px] font-black uppercase ${data.assessmentType === 'AI-Free' ? 'text-rose-600' : 'text-amber-600'}`}>{label}</span>}
+                        </p>
+                      );
+                    })
+                  ) : (
+                    <p className="text-[11px] italic text-gray-300">None added yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto px-6 py-12">
+            <div className="min-h-[450px]">{renderStepContent()}</div>
+            {step < 8 && (
+              <div className="mt-12 flex items-center justify-between pt-8 border-t border-gray-100">
+                <button onClick={prevStep} disabled={step === 1} className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${step === 1 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-gray-900'}`}>
+                  Back
+                </button>
+                <button 
+                  onClick={nextStep} 
+                  disabled={(step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)}
+                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-opacity ${((step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {step === 7 ? 'Finalize Blueprint' : 'Next Step'}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default App;
