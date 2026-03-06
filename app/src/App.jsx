@@ -41,7 +41,7 @@ const App = () => {
     learningOutcomes: ['', ''], 
     tasks: [''], 
     assessmentType: '', 
-    integratedSubtype: '', // 'ObjectOfStudy' or 'Collaborator'
+    integratedSubtype: '', 
     essentialTaskIndices: [], 
     aiLiteracyReasoning: '',
     humanCompetencyStrategy: '', 
@@ -238,20 +238,6 @@ const App = () => {
                 <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 5: Strategic Choice</label>
                 <h3 className="text-2xl font-bold text-gray-900">Categorize the Assessment</h3>
               </div>
-              
-              <div className="bg-white border border-indigo-100 rounded-2xl p-4 shadow-sm max-w-sm w-full">
-                <div className="flex items-center gap-2 mb-2">
-                  <ListTodo className="w-3 h-3 text-indigo-600" />
-                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Current Tasks</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {data.tasks.filter(t => t.trim()).map((t, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-md border border-indigo-100">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -333,7 +319,6 @@ const App = () => {
                     <h4 className="font-bold text-gray-900">AI as Object of Study</h4>
                     <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
                       AI use is prevalent in the field; CLOs require students to <strong>analyze and evaluate</strong> AI's role. 
-                      Domain-based AI literacy is a primary goal (e.g., evaluating AI ethics in life choices).
                     </p>
                   </div>
                 </button>
@@ -346,7 +331,6 @@ const App = () => {
                     <h4 className="font-bold text-gray-900">AI as Collaborator</h4>
                     <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
                       AI is <strong>weaved into the professional workflow</strong> of performing job-critical tasks.
-                      The focus is on augmented productivity and professional output (e.g., scriptwriting to production).
                     </p>
                   </div>
                 </button>
@@ -393,14 +377,13 @@ const App = () => {
               <div className="space-y-2">
                 <label className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Step 7: Accountability</label>
                 <h3 className="text-2xl font-bold text-gray-900">Human-in-the-Loop Measures</h3>
-                <p className="text-sm text-gray-500">How will student mastery be assessed in this integrated environment?</p>
               </div>
               <div className="space-y-6">
                 <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
                   <p className="text-xs font-bold text-emerald-800 mb-2">Required Submission Components:</p>
                   <textarea 
                     className="w-full h-32 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
-                    placeholder={data.integratedSubtype === 'ObjectOfStudy' ? "e.g., Comparative analysis of AI outputs, critique of AI bias, documented evaluation of AI reliability..." : "e.g., Prompt logs, version history showing human intervention, reflection on how AI influenced the professional workflow..."}
+                    placeholder="e.g., Prompt logs, version history, or a critical evaluation of AI outputs..."
                     value={data.submissionRequirements}
                     onChange={(e) => updateData('submissionRequirements', e.target.value)}
                   />
@@ -425,7 +408,7 @@ const App = () => {
                     ))}
                   </div>
 
-                  <p className="text-sm font-bold text-gray-700 mt-2">Integrity & Authenticity Implementation Details:</p>
+                  <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
                   <textarea 
                     className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
                     placeholder="Describe exactly how this verification will be managed..."
@@ -433,23 +416,10 @@ const App = () => {
                     onChange={(e) => updateData('integrityProvisions', e.target.value)}
                   />
                 </div>
-
-                <div className="space-y-2">
-                   <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
-                   <textarea 
-                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
-                    placeholder="How will students ensure they aren't just following AI blindly? (e.g., critical reflection on AI errors...)"
-                    value={data.criticalEngagement}
-                    onChange={(e) => updateData('criticalEngagement', e.target.value)}
-                  />
-                </div>
               </div>
             </div>
           );
         }
-        const essentialTasks = data.essentialTaskIndices.map(i => data.tasks[i]);
-        const nonEssentialTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
-
         return (
           <div className="space-y-8 animate-in fade-in duration-500 pb-20">
              <div className="space-y-6">
@@ -458,62 +428,37 @@ const App = () => {
                 <h3 className="text-2xl font-bold text-gray-900">Integrity & AI Guidelines</h3>
               </div>
               <div className="space-y-4">
-                <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                  <p className="text-[10px] font-black uppercase text-indigo-600 tracking-widest mb-2">
-                    {data.assessmentType === 'AI-Free' ? 'Full Scope of Human Work' : 'Core Human Tasks (No AI)'}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {data.assessmentType === 'AI-Free' 
-                      ? data.tasks.filter(t => t.trim()).map((t, i) => (
-                        <span key={i} className="px-2 py-1 bg-white rounded border border-rose-200 text-xs font-bold text-rose-700">{t}</span>
-                      ))
-                      : essentialTasks.map((t, i) => (
-                        <span key={i} className="px-2 py-1 bg-white rounded border border-amber-200 text-xs font-bold text-amber-700">{t}</span>
-                      ))
-                    }
-                  </div>
+                <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
+                <div className="grid grid-cols-1 gap-3">
+                  {[
+                    { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
+                    { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
+                    { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
+                  ].map(strategy => (
+                    <button 
+                      key={strategy.id}
+                      onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
+                      className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:border-indigo-200'}`}
+                    >
+                      <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
+                      <span className="text-[11px] text-gray-500">{strategy.desc}</span>
+                    </button>
+                  ))}
                 </div>
-                <div className="space-y-4">
-                  <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {[
-                      { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
-                      { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
-                      { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
-                    ].map(strategy => (
-                      <button 
-                        key={strategy.id}
-                        onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
-                        className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:border-indigo-200'}`}
-                      >
-                        <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
-                        <span className="text-[11px] text-gray-500">{strategy.desc}</span>
-                      </button>
-                    ))}
-                  </div>
 
-                  <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
-                  <textarea 
-                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
-                    placeholder="Describe exactly how this verification will be managed..."
-                    value={data.integrityProvisions}
-                    onChange={(e) => updateData('integrityProvisions', e.target.value)}
-                  />
-                </div>
+                <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
+                <textarea 
+                  className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                  placeholder="Describe exactly how this verification will be managed..."
+                  value={data.integrityProvisions}
+                  onChange={(e) => updateData('integrityProvisions', e.target.value)}
+                />
               </div>
 
               {data.assessmentType === 'AI-Assisted' && (
                 <div className="space-y-6 border-t border-gray-100 pt-6">
-                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                    <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-2">AI-Permitted Tasks:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {nonEssentialTasks.length > 0 ? nonEssentialTasks.map((t, i) => (
-                        <span key={i} className="px-2 py-1 bg-white rounded border border-emerald-200 text-xs font-bold">{t}</span>
-                      )) : <span className="text-xs text-emerald-600 italic">None selected</span>}
-                    </div>
-                  </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Describe how students will use AI in these specific tasks:</p>
+                    <p className="text-sm font-bold text-gray-700">Describe AI-permitted usage:</p>
                     <textarea 
                       className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
                       placeholder="e.g., 'May use AI for brainstorming but must cite it'..."
@@ -522,9 +467,8 @@ const App = () => {
                     />
                   </div>
                   
-                  <div className="space-y-2 bg-indigo-50/30 p-4 rounded-2xl border border-indigo-100/50">
+                  <div className="space-y-2">
                     <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
-                    <p className="text-[11px] text-gray-500 mb-2 leading-tight">How will you ensure students critically evaluate AI outputs in the permitted tasks?</p>
                     <textarea 
                       className="w-full h-24 p-3 border rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-100"
                       placeholder="e.g., Requiring a critique of AI's reasoning or identifying hallucinated facts..."
@@ -539,9 +483,9 @@ const App = () => {
         );
       case 8:
         const theme = getThemeColor();
-        const coreTasksNames = data.essentialTaskIndices.map(i => data.tasks[i]).join(", ");
-        const auxiliaryTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
         const outcomesList = data.learningOutcomes.filter(o => o.trim()).join("; ");
+        const essentialTasks = data.essentialTaskIndices.map(i => data.tasks[i]);
+        const auxiliaryTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
         
         const getPolicyText = () => {
           if (data.assessmentType === 'AI-Free') {
@@ -549,6 +493,7 @@ const App = () => {
           }
           if (data.assessmentType === 'AI-Assisted') {
             const tasksString = formatListWithAnd(auxiliaryTasks);
+            const coreTasksNames = formatListWithAnd(essentialTasks);
             return `This is an AI-ASSISTED ASSESSMENT. You are allowed to use AI to: ${tasksString || '[tasks]'}. However, the use of AI is strictly prohibited for the following core tasks: ${coreTasksNames || '[tasks]'}.\n\nYour independent performance of these core tasks will be verified as follows: ${data.integrityProvisions || '[Implementation details]'}. ${data.criticalEngagement ? `\n\nYou are also expected to demonstrate critical engagement with AI outputs: ${data.criticalEngagement}` : ''}`;
           }
           return `This is an AI-INTEGRATED ASSESSMENT. AI is utilised for ${data.integrationFocus || 'all tasks'}. To demonstrate Course Learning Outcomes, you must provide the following accountability evidence: ${data.submissionRequirements}. \n\nTo ensure mastery: ${data.integrityProvisions}. ${data.criticalEngagement ? `\n\nRequirement for critical engagement: ${data.criticalEngagement}` : ''}`;
@@ -568,7 +513,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Changed from `shadow-xl p-1` to `shadow-xl` below to fix the gap issue */}
             <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl`}>
               <div className={`${theme.banner} p-6 text-white`}>
                 <div className="flex justify-between items-start">
@@ -578,14 +522,14 @@ const App = () => {
                     <p className="text-xs font-bold opacity-90 mt-1">{data.courseName || 'Course'}: {data.subject || 'Assessment'}</p>
                   </div>
                   <div className="bg-white/20 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30 text-center">
-                    {data.assessmentType} {data.integratedSubtype === 'ObjectOfStudy' ? '(Object of Study)' : data.integratedSubtype === 'Collaborator' ? '(Collaborator)' : ''}
+                    {data.assessmentType}
                   </div>
                 </div>
               </div>
               
               <div className="p-8 space-y-6 bg-white">
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white flex flex-col`}>
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Target Outcomes</p>
                     <ul className="space-y-2">
                       {data.learningOutcomes.filter(o => o.trim()).map((o, i) => (
@@ -593,20 +537,35 @@ const App = () => {
                       ))}
                     </ul>
                   </div>
-                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Integrity Strategy</p>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-[9px] font-black text-gray-400 uppercase">Verification Approach:</p>
-                        <p className="text-xs font-bold text-gray-700">{data.integrityProvisions || 'Defined in policy'}</p>
-                      </div>
-                      {data.criticalEngagement && (
-                        <div>
-                          <p className="text-[9px] font-black text-gray-400 uppercase">Critical Engagement:</p>
-                          <p className="text-[10px] text-gray-600 font-medium line-clamp-3">{data.criticalEngagement}</p>
-                        </div>
-                      )}
-                    </div>
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white flex flex-col`}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Tasks Breakdown</p>
+                    <ul className="space-y-2">
+                      {data.tasks.filter(t => t.trim()).map((t, i) => {
+                        const isEssential = data.assessmentType === 'AI-Free' || data.essentialTaskIndices.includes(i);
+                        return (
+                          <li key={i} className="flex items-center justify-between text-[11px] font-semibold text-gray-700 bg-gray-50/50 p-2 rounded-lg border border-gray-100">
+                            <span className="truncate mr-2">{t}</span>
+                            <div className="flex-shrink-0">
+                                {data.assessmentType === 'AI-Assisted' && (
+                                <span className={`px-2 py-0.5 text-[8px] font-black uppercase rounded ${isEssential ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
+                                    {isEssential ? 'Human' : 'AI-Permitted'}
+                                </span>
+                                )}
+                                {data.assessmentType === 'AI-Free' && (
+                                <span className="px-2 py-0.5 text-[8px] font-black uppercase rounded bg-rose-100 text-rose-700 border border-rose-200">
+                                    Human
+                                </span>
+                                )}
+                                {data.assessmentType === 'AI-Integrated' && (
+                                <span className="px-2 py-0.5 text-[8px] font-black uppercase rounded bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                    Augmented
+                                </span>
+                                )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 </div>
 
@@ -665,12 +624,6 @@ const App = () => {
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assessment</label>
                   <p className="text-sm font-bold text-gray-800 line-clamp-1">{data.subject || '...'}</p>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</label>
-                  <div className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${data.assessmentType === 'AI-Free' ? 'bg-rose-100 text-rose-600' : data.assessmentType === 'AI-Assisted' ? 'bg-amber-100 text-amber-600' : data.assessmentType === 'AI-Integrated' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
-                    {data.assessmentType || 'Pending'}
-                  </div>
-                </div>
               </div>
 
               <div className="space-y-2 pt-4 border-t border-gray-50">
@@ -692,22 +645,15 @@ const App = () => {
               <div className="space-y-2 pt-4 border-t border-gray-50">
                 <div className="flex items-center gap-2">
                   <ListTodo className="w-3 h-3 text-indigo-600" />
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tasks</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Tasks</label>
                 </div>
                 <div className="space-y-1">
                   {data.tasks.filter(t => t.trim()).length > 0 ? (
-                    data.tasks.filter(t => t.trim()).map((t, i) => {
-                      const isEssential = data.assessmentType === 'AI-Free' || data.essentialTaskIndices.includes(data.tasks.indexOf(t));
-                      const taskColor = data.assessmentType === 'AI-Free' ? 'border-rose-300 bg-rose-50/50' : 'border-amber-400 bg-amber-50/50';
-                      const label = data.assessmentType === 'AI-Free' ? '(Human)' : '(Core)';
-                      
-                      return (
-                        <p key={i} className={`text-[11px] font-medium leading-tight border-l-2 pl-2 py-0.5 ${isEssential ? taskColor : 'border-gray-100 text-gray-600'}`}>
-                          {t}
-                          {isEssential && <span className={`ml-2 text-[8px] font-black uppercase ${data.assessmentType === 'AI-Free' ? 'text-rose-600' : 'text-amber-600'}`}>{label}</span>}
-                        </p>
-                      );
-                    })
+                    data.tasks.filter(t => t.trim()).map((t, i) => (
+                      <p key={i} className={`text-[11px] font-medium leading-tight border-l-2 pl-2 py-0.5 border-gray-100 text-gray-600`}>
+                        {t}
+                      </p>
+                    ))
                   ) : (
                     <p className="text-[11px] italic text-gray-300">None added yet</p>
                   )}
