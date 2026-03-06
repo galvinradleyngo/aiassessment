@@ -26,7 +26,9 @@ import {
   ShieldAlert,
   Users,
   Search,
-  ListTodo
+  ListTodo,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 const html2canvasScript = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
@@ -42,11 +44,9 @@ const App = () => {
     assessmentType: '', 
     integratedSubtype: '', 
     essentialTaskIndices: [], 
-    aiLiteracyReasoning: '',
     humanCompetencyStrategy: '', 
     integrityProvisions: '',
     submissionRequirements: '', 
-    aiUsageGuidelines: '', 
     integrationFocus: '',
     criticalEngagement: '', 
   });
@@ -93,7 +93,7 @@ const App = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-          if (step < 8 && step !== 5 && step !== 6) {
+          if (step < 8 && step !== 5 && step !== 6 && step !== 7) {
             e.preventDefault();
             nextStep();
           }
@@ -127,10 +127,10 @@ const App = () => {
   };
 
   const getThemeColor = () => {
-    if (data.assessmentType === 'AI-Free') return { border: 'border-rose-500', bg: 'bg-rose-50', text: 'text-rose-700', banner: 'bg-rose-600' };
-    if (data.assessmentType === 'AI-Assisted') return { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', banner: 'bg-amber-600' };
-    if (data.assessmentType === 'AI-Integrated') return { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', banner: 'bg-emerald-600' };
-    return { border: 'border-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-700', banner: 'bg-indigo-600' };
+    if (data.assessmentType === 'AI-Free') return { border: 'border-rose-500', bg: 'bg-rose-50', text: 'text-rose-700', banner: 'bg-rose-600', accent: 'rose' };
+    if (data.assessmentType === 'AI-Assisted') return { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', banner: 'bg-amber-600', accent: 'amber' };
+    if (data.assessmentType === 'AI-Integrated') return { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', banner: 'bg-emerald-600', accent: 'emerald' };
+    return { border: 'border-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-700', banner: 'bg-indigo-600', accent: 'indigo' };
   };
 
   const formatListWithAnd = (items) => {
@@ -372,22 +372,55 @@ const App = () => {
         );
       case 7:
         const isIntegrated = data.assessmentType === 'AI-Integrated';
-        const currentThemeColor = isIntegrated ? 'emerald' : 'indigo';
+        const isAssisted = data.assessmentType === 'AI-Assisted';
+        const themeStep7 = getThemeColor();
         
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             <div className="space-y-2">
-              <label className={`text-xs font-bold text-${currentThemeColor}-600 uppercase tracking-widest`}>Step 7: Safeguards</label>
-              <h3 className="text-2xl font-bold text-gray-900">Accountability & Integrity</h3>
+              <label className={`text-xs font-bold ${themeStep7.text} uppercase tracking-widest`}>Step 7: Safeguards & Usage</label>
+              <h3 className="text-2xl font-bold text-gray-900">Integrity & AI Guidelines</h3>
             </div>
             
             <div className="space-y-6">
+              {/* Task Summary Reference */}
+              <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Usage Scope Reference</p>
+                <div className="grid gap-2">
+                    {data.tasks.filter(t => t.trim()).map((t, i) => {
+                        const isCore = isAssisted ? data.essentialTaskIndices.includes(i) : false;
+                        const isIntegratedMode = data.assessmentType === 'AI-Integrated';
+                        return (
+                            <div key={i} className="flex items-center gap-2 text-[11px] font-bold py-1 border-b border-gray-100 last:border-0">
+                                {isIntegratedMode ? (
+                                    <div className="flex items-center gap-2 text-emerald-600">
+                                        <Zap className="w-3 h-3" />
+                                        <span>[Augmented]</span>
+                                    </div>
+                                ) : isCore ? (
+                                    <div className="flex items-center gap-2 text-amber-600">
+                                        <Lock className="w-3 h-3" />
+                                        <span>[Human Only]</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-emerald-500">
+                                        <Unlock className="w-3 h-3" />
+                                        <span>[AI Permitted]</span>
+                                    </div>
+                                )}
+                                <span className="text-gray-700 truncate">{t}</span>
+                            </div>
+                        )
+                    })}
+                </div>
+              </div>
+
               {isIntegrated && (
-                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
                   <p className="text-xs font-bold text-emerald-800 mb-2">Required Submission Components:</p>
                   <textarea 
                     className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
-                    placeholder="e.g., Prompt logs, version history..."
+                    placeholder="e.g., Prompt logs, version history, or a breakdown of AI contributions..."
                     value={data.submissionRequirements}
                     onChange={(e) => updateData('submissionRequirements', e.target.value)}
                   />
@@ -396,38 +429,37 @@ const App = () => {
 
               <div className="space-y-4">
                 <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {[
-                    { id: 'Proctoring', title: 'Proctoring', desc: 'On-site direct supervision.' },
-                    { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Viva or oral defense.' },
-                    { id: 'Documentation', title: 'Documentation', desc: 'Documentary evidence of process.' }
+                    { id: 'Proctoring', title: 'Proctoring' },
+                    { id: 'Validation (Oral/Viva)', title: 'Oral Validation' },
+                    { id: 'Documentation', title: 'Documentation' }
                   ].map(strategy => (
                     <button 
                       key={strategy.id}
                       onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? `border-${currentThemeColor}-600 bg-${currentThemeColor}-50 shadow-sm` : 'border-gray-100 bg-white hover:border-gray-200'}`}
+                      className={`p-3 rounded-xl border-2 text-center transition-all ${data.humanCompetencyStrategy === strategy.id ? `border-${themeStep7.accent}-600 bg-${themeStep7.accent}-50 text-${themeStep7.accent}-700 shadow-sm` : 'border-gray-100 bg-white hover:border-gray-200 text-gray-500'}`}
                     >
-                      <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
-                      <span className="text-[11px] text-gray-500">{strategy.desc}</span>
+                      <span className="text-[11px] font-bold">{strategy.title}</span>
                     </button>
                   ))}
                 </div>
 
-                <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
+                <p className="text-sm font-bold text-gray-700 mt-2">Integrity Implementation Details:</p>
                 <textarea 
-                  className={`w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-${currentThemeColor}-100`}
-                  placeholder="Describe exactly how this verification will be managed..."
+                  className={`w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-${themeStep7.accent}-100`}
+                  placeholder="Describe exactly how this verification will be managed (e.g., 'A 5-minute viva will be conducted for each group to discuss their prompt strategy')..."
                   value={data.integrityProvisions}
                   onChange={(e) => updateData('integrityProvisions', e.target.value)}
                 />
               </div>
 
-              {data.assessmentType === 'AI-Assisted' && (
+              {isAssisted && (
                 <div className="space-y-4 pt-6 border-t border-gray-100">
-                  <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
+                  <p className="text-sm font-bold text-gray-700">Strategy for Critical Engagement:</p>
                   <textarea 
-                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
-                    placeholder="e.g., Requiring a critique of AI's reasoning..."
+                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-100"
+                    placeholder="How will students prove they thought critically about the AI output? (e.g., 'Students must submit a track-changes document showing where they manually corrected AI-generated errors')..."
                     value={data.criticalEngagement}
                     onChange={(e) => updateData('criticalEngagement', e.target.value)}
                   />
