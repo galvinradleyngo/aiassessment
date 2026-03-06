@@ -568,7 +568,7 @@ const App = () => {
               </div>
             </div>
 
-            <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl p-1`}>
+            <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl`}>
               <div className={`${theme.banner} p-6 text-white`}>
                 <div className="flex justify-between items-start">
                   <div className="max-w-[70%]">
