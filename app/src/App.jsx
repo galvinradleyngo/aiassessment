@@ -29,7 +29,6 @@ import {
   ListTodo
 } from 'lucide-react';
 
-// For image export
 const html2canvasScript = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
 
 const App = () => {
@@ -89,6 +88,7 @@ const App = () => {
   
   const prevStep = () => setStep(prev => prev - 1);
 
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -102,22 +102,29 @@ const App = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [step, data.assessmentType]);
+  }, [step, data]);
 
-  const downloadImage = async () => {
-    if (!blueprintRef.current) return;
-    const canvas = await window.html2canvas(blueprintRef.current);
-    const link = document.createElement('a');
-    link.download = `Blueprint-${data.subject || 'Assessment'}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
-  };
-
+  // Load html2canvas for image export
   useEffect(() => {
     const script = document.createElement('script');
     script.src = html2canvasScript;
+    script.async = true;
     document.head.appendChild(script);
   }, []);
+
+  const downloadImage = async () => {
+    if (!blueprintRef.current || !window.html2canvas) return;
+    const canvas = await window.html2canvas(blueprintRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff"
+    });
+    const link = document.createElement('a');
+    link.download = `Blueprint-${data.subject || 'Assessment'}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
 
   const getThemeColor = () => {
     if (data.assessmentType === 'AI-Free') return { border: 'border-rose-500', bg: 'bg-rose-50', text: 'text-rose-700', banner: 'bg-rose-600' };
@@ -138,7 +145,7 @@ const App = () => {
     switch(step) {
       case 1:
         return (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 1</label>
               <h3 className="text-2xl font-bold text-gray-900">Course Identification</h3>
@@ -146,7 +153,7 @@ const App = () => {
             </div>
             <input 
               autoFocus
-              className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
               placeholder="e.g., Cost Accounting"
               value={data.courseName}
               onChange={(e) => updateData('courseName', e.target.value)}
@@ -155,7 +162,7 @@ const App = () => {
         );
       case 2:
         return (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 2</label>
               <h3 className="text-2xl font-bold text-gray-900">Assessment Title</h3>
@@ -163,7 +170,7 @@ const App = () => {
             </div>
             <input 
               autoFocus
-              className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
               placeholder="e.g., Cost Analysis Report"
               value={data.subject}
               onChange={(e) => updateData('subject', e.target.value)}
@@ -172,7 +179,7 @@ const App = () => {
         );
       case 3:
         return (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 3</label>
               <h3 className="text-2xl font-bold text-gray-900">Learning Outcomes</h3>
@@ -180,7 +187,7 @@ const App = () => {
             </div>
             <div className="space-y-3">
               {data.learningOutcomes.map((outcome, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex gap-2 group">
                   <input 
                     className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
                     placeholder={`Outcome ${index + 1}...`}
@@ -188,13 +195,13 @@ const App = () => {
                     onChange={(e) => handleOutcomeChange(index, e.target.value)}
                   />
                   {data.learningOutcomes.length > 1 && (
-                    <button onClick={() => updateData('learningOutcomes', data.learningOutcomes.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-rose-500">
+                    <button onClick={() => updateData('learningOutcomes', data.learningOutcomes.filter((_, i) => i !== index))} className="p-2 text-gray-300 hover:text-rose-500 transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
               ))}
-              <button onClick={() => updateData('learningOutcomes', [...data.learningOutcomes, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+              <button onClick={() => updateData('learningOutcomes', [...data.learningOutcomes, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1 hover:text-indigo-800 transition-colors">
                 <Plus className="w-3 h-3" /> Add Outcome
               </button>
             </div>
@@ -202,7 +209,7 @@ const App = () => {
         );
       case 4:
         return (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 4</label>
               <h3 className="text-2xl font-bold text-gray-900">Task Breakdown</h3>
@@ -210,7 +217,7 @@ const App = () => {
             </div>
             <div className="space-y-3">
               {data.tasks.map((task, index) => (
-                <div key={index} className="flex gap-2">
+                <div key={index} className="flex gap-2 group">
                   <input 
                     className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
                     placeholder={`Task ${index + 1}...`}
@@ -218,13 +225,13 @@ const App = () => {
                     onChange={(e) => handleTaskChange(index, e.target.value)}
                   />
                   {data.tasks.length > 1 && (
-                    <button onClick={() => updateData('tasks', data.tasks.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-rose-500">
+                    <button onClick={() => updateData('tasks', data.tasks.filter((_, i) => i !== index))} className="p-2 text-gray-300 hover:text-rose-500 transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
               ))}
-              <button onClick={() => updateData('tasks', [...data.tasks, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+              <button onClick={() => updateData('tasks', [...data.tasks, ''])} className="text-xs font-bold text-indigo-600 flex items-center gap-1 hover:text-indigo-800 transition-colors">
                 <Plus className="w-3 h-3" /> Add Task
               </button>
             </div>
@@ -232,12 +239,10 @@ const App = () => {
         );
       case 5:
         return (
-          <div className="space-y-8 animate-in fade-in duration-500 pb-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 5: Strategic Choice</label>
-                <h3 className="text-2xl font-bold text-gray-900">Categorize the Assessment</h3>
-              </div>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 5: Strategic Choice</label>
+              <h3 className="text-2xl font-bold text-gray-900">Categorize the Assessment</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -271,11 +276,11 @@ const App = () => {
       case 6:
         if (data.assessmentType === 'AI-Free') {
           return (
-            <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-rose-600 uppercase tracking-widest">Step 6: AI-Free Confirmation</label>
                 <h3 className="text-2xl font-bold text-gray-900">Integrity & Performance</h3>
-                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl space-y-4">
+                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl">
                   <p className="text-sm text-rose-900 leading-relaxed font-medium">
                     Since this is an <strong>AI-Free assessment</strong>, students are prohibited from using AI in all tasks. 
                     Please select the primary strategy to ensure that they perform them personally.
@@ -291,7 +296,7 @@ const App = () => {
                   <button 
                     key={strategy.id}
                     onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
-                    className={`p-5 rounded-2xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-rose-600 bg-rose-50' : 'border-gray-100 bg-white hover:border-rose-200'}`}
+                    className={`p-5 rounded-2xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-rose-600 bg-rose-50 shadow-md shadow-rose-100' : 'border-gray-100 bg-white hover:border-rose-200'}`}
                   >
                     <span className="text-sm font-bold text-rose-800">{strategy.title}</span>
                     <span className="text-xs text-rose-600/70">{strategy.desc}</span>
@@ -303,35 +308,30 @@ const App = () => {
         }
         if (data.assessmentType === 'AI-Integrated') {
           return (
-            <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Step 6: Integration Path</label>
                 <h3 className="text-2xl font-bold text-gray-900">Select Integration Type</h3>
-                <p className="text-sm text-gray-500">How is AI being utilized in this specific disciplinary context?</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <button
                   onClick={() => updateData('integratedSubtype', 'ObjectOfStudy')}
-                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 ${data.integratedSubtype === 'ObjectOfStudy' ? 'border-emerald-600 bg-emerald-50' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
+                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 ${data.integratedSubtype === 'ObjectOfStudy' ? 'border-emerald-600 bg-emerald-50 shadow-md shadow-emerald-100' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
                 >
                   <Search className={`w-6 h-6 ${data.integratedSubtype === 'ObjectOfStudy' ? 'text-emerald-600' : 'text-gray-400'}`} />
                   <div>
                     <h4 className="font-bold text-gray-900">AI as Object of Study</h4>
-                    <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
-                      AI use is prevalent in the field; CLOs require students to <strong>analyze and evaluate</strong> AI's role. 
-                    </p>
+                    <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">AI use is prevalent in the field; CLOs require students to analyze and evaluate AI's role.</p>
                   </div>
                 </button>
                 <button
                   onClick={() => updateData('integratedSubtype', 'Collaborator')}
-                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 ${data.integratedSubtype === 'Collaborator' ? 'border-emerald-600 bg-emerald-50' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
+                  className={`p-6 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 ${data.integratedSubtype === 'Collaborator' ? 'border-emerald-600 bg-emerald-50 shadow-md shadow-emerald-100' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
                 >
                   <Users className={`w-6 h-6 ${data.integratedSubtype === 'Collaborator' ? 'text-emerald-600' : 'text-gray-400'}`} />
                   <div>
                     <h4 className="font-bold text-gray-900">AI as Collaborator</h4>
-                    <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
-                      AI is <strong>weaved into the professional workflow</strong> of performing job-critical tasks.
-                    </p>
+                    <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">AI is weaved into the professional workflow of performing job-critical tasks.</p>
                   </div>
                 </button>
               </div>
@@ -340,7 +340,7 @@ const App = () => {
                   <p className="text-sm font-bold text-gray-700">Specific focus of this integration:</p>
                   <textarea 
                     className="w-full h-32 p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-100 text-sm"
-                    placeholder={data.integratedSubtype === 'ObjectOfStudy' ? "e.g., Evaluating the reliability of AI-generated legal advice in common law..." : "e.g., Using generative AI for iterative code refactoring and technical documentation..."}
+                    placeholder={data.integratedSubtype === 'ObjectOfStudy' ? "Evaluating AI's role in the field..." : "Co-creating outputs with AI..."}
                     value={data.integrationFocus}
                     onChange={(e) => updateData('integrationFocus', e.target.value)}
                   />
@@ -350,7 +350,7 @@ const App = () => {
           );
         }
         return (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-xs font-bold text-amber-600 uppercase tracking-widest">Step 6: Task Alignment</label>
               <h3 className="text-2xl font-bold text-gray-900">Select Core Human Tasks</h3>
@@ -361,7 +361,7 @@ const App = () => {
                 <button
                   key={index}
                   onClick={() => toggleEssential(index)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${data.essentialTaskIndices.includes(index) ? 'border-amber-600 bg-amber-50' : 'border-gray-100 bg-white'}`}
+                  className={`p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${data.essentialTaskIndices.includes(index) ? 'border-amber-600 bg-amber-50 shadow-sm shadow-amber-100' : 'border-gray-100 bg-white hover:border-amber-200'}`}
                 >
                   <span className="text-sm font-bold">{task}</span>
                   {data.essentialTaskIndices.includes(index) && <CheckCircle2 className="w-4 h-4 text-amber-600" />}
@@ -371,74 +371,41 @@ const App = () => {
           </div>
         );
       case 7:
-        if (data.assessmentType === 'AI-Integrated') {
-          return (
-            <div className="space-y-6 animate-in fade-in duration-500 pb-20">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Step 7: Accountability</label>
-                <h3 className="text-2xl font-bold text-gray-900">Human-in-the-Loop Measures</h3>
-              </div>
-              <div className="space-y-6">
+        const isIntegrated = data.assessmentType === 'AI-Integrated';
+        const currentThemeColor = isIntegrated ? 'emerald' : 'indigo';
+        
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+            <div className="space-y-2">
+              <label className={`text-xs font-bold text-${currentThemeColor}-600 uppercase tracking-widest`}>Step 7: Safeguards</label>
+              <h3 className="text-2xl font-bold text-gray-900">Accountability & Integrity</h3>
+            </div>
+            
+            <div className="space-y-6">
+              {isIntegrated && (
                 <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
                   <p className="text-xs font-bold text-emerald-800 mb-2">Required Submission Components:</p>
                   <textarea 
-                    className="w-full h-32 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
-                    placeholder="e.g., Prompt logs, version history, or a critical evaluation of AI outputs..."
+                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
+                    placeholder="e.g., Prompt logs, version history..."
                     value={data.submissionRequirements}
                     onChange={(e) => updateData('submissionRequirements', e.target.value)}
                   />
                 </div>
-                
-                <div className="space-y-4">
-                  <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {[
-                      { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
-                      { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
-                      { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
-                    ].map(strategy => (
-                      <button 
-                        key={strategy.id}
-                        onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
-                        className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-emerald-600 bg-emerald-50' : 'border-gray-100 bg-white hover:border-emerald-200'}`}
-                      >
-                        <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
-                        <span className="text-[11px] text-gray-500">{strategy.desc}</span>
-                      </button>
-                    ))}
-                  </div>
+              )}
 
-                  <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
-                  <textarea 
-                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-100"
-                    placeholder="Describe exactly how this verification will be managed..."
-                    value={data.integrityProvisions}
-                    onChange={(e) => updateData('integrityProvisions', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-             <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 7: Safeguards & Usage</label>
-                <h3 className="text-2xl font-bold text-gray-900">Integrity & AI Guidelines</h3>
-              </div>
               <div className="space-y-4">
                 <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
                 <div className="grid grid-cols-1 gap-3">
                   {[
-                    { id: 'Proctoring', title: 'Proctoring', desc: 'Students perform the assessment on-site with direct supervision.' },
-                    { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Students defend their work to verify authorship.' },
-                    { id: 'Documentation', title: 'Documentation', desc: 'Students submit documentary evidence of their work process.' }
+                    { id: 'Proctoring', title: 'Proctoring', desc: 'On-site direct supervision.' },
+                    { id: 'Validation (Oral/Viva)', title: 'Validation (Oral/Viva)', desc: 'Viva or oral defense.' },
+                    { id: 'Documentation', title: 'Documentation', desc: 'Documentary evidence of process.' }
                   ].map(strategy => (
                     <button 
                       key={strategy.id}
                       onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:border-indigo-200'}`}
+                      className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? `border-${currentThemeColor}-600 bg-${currentThemeColor}-50 shadow-sm` : 'border-gray-100 bg-white hover:border-gray-200'}`}
                     >
                       <span className="text-sm font-bold text-gray-800">{strategy.title}</span>
                       <span className="text-[11px] text-gray-500">{strategy.desc}</span>
@@ -448,7 +415,7 @@ const App = () => {
 
                 <p className="text-sm font-bold text-gray-700 mt-2">Implementation Details:</p>
                 <textarea 
-                  className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                  className={`w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-${currentThemeColor}-100`}
                   placeholder="Describe exactly how this verification will be managed..."
                   value={data.integrityProvisions}
                   onChange={(e) => updateData('integrityProvisions', e.target.value)}
@@ -456,26 +423,14 @@ const App = () => {
               </div>
 
               {data.assessmentType === 'AI-Assisted' && (
-                <div className="space-y-6 border-t border-gray-100 pt-6">
-                  <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Describe AI-permitted usage:</p>
-                    <textarea 
-                      className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
-                      placeholder="e.g., 'May use AI for brainstorming but must cite it'..."
-                      value={data.aiUsageGuidelines}
-                      onChange={(e) => updateData('aiUsageGuidelines', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
-                    <textarea 
-                      className="w-full h-24 p-3 border rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-100"
-                      placeholder="e.g., Requiring a critique of AI's reasoning or identifying hallucinated facts..."
-                      value={data.criticalEngagement}
-                      onChange={(e) => updateData('criticalEngagement', e.target.value)}
-                    />
-                  </div>
+                <div className="space-y-4 pt-6 border-t border-gray-100">
+                  <p className="text-sm font-bold text-gray-700">Assurance of Critical Engagement:</p>
+                  <textarea 
+                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder="e.g., Requiring a critique of AI's reasoning..."
+                    value={data.criticalEngagement}
+                    onChange={(e) => updateData('criticalEngagement', e.target.value)}
+                  />
                 </div>
               )}
             </div>
@@ -513,12 +468,12 @@ const App = () => {
               </div>
             </div>
 
-            <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-xl`}>
-              <div className={`${theme.banner} p-6 text-white`}>
+            <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-2xl`}>
+              <div className={`${theme.banner} p-6 text-white m-0`}>
                 <div className="flex justify-between items-start">
                   <div className="max-w-[70%]">
-                    <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Assessment Design Blueprint</p>
-                    <h4 className="text-xl font-bold leading-tight mt-1">AI-Adaptive Assessment Blueprint</h4>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Design Artifact</p>
+                    <h4 className="text-xl font-bold leading-tight mt-1">AI-Adaptive Blueprint</h4>
                     <p className="text-xs font-bold opacity-90 mt-1">{data.courseName || 'Course'}: {data.subject || 'Assessment'}</p>
                   </div>
                   <div className="bg-white/20 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30 text-center">
@@ -529,15 +484,18 @@ const App = () => {
               
               <div className="p-8 space-y-6 bg-white">
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white flex flex-col`}>
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Target Outcomes</p>
                     <ul className="space-y-2">
                       {data.learningOutcomes.filter(o => o.trim()).map((o, i) => (
-                        <li key={i} className="text-xs font-semibold text-gray-700 leading-relaxed">• {o}</li>
+                        <li key={i} className="text-xs font-semibold text-gray-700 leading-relaxed flex gap-2">
+                            <CheckCircle2 className={`w-3 h-3 mt-0.5 flex-shrink-0 ${theme.text}`} />
+                            {o}
+                        </li>
                       ))}
                     </ul>
                   </div>
-                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white flex flex-col`}>
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Tasks Breakdown</p>
                     <ul className="space-y-2">
                       {data.tasks.filter(t => t.trim()).map((t, i) => {
@@ -607,7 +565,7 @@ const App = () => {
       </nav>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className={`bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'w-80' : 'w-0'}`}>
+        <aside className={`bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col overflow-hidden ${isSidebarOpen ? 'w-80' : 'w-0'}`}>
           <div className="p-6 flex-1 overflow-y-auto space-y-8 min-w-[320px]">
             <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
               <LayoutDashboard className="w-4 h-4 text-indigo-600" />
@@ -618,11 +576,11 @@ const App = () => {
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Course</label>
-                  <p className="text-sm font-bold text-gray-800 line-clamp-1">{data.courseName || '...'}</p>
+                  <p className="text-sm font-bold text-gray-800 truncate">{data.courseName || '...'}</p>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assessment</label>
-                  <p className="text-sm font-bold text-gray-800 line-clamp-1">{data.subject || '...'}</p>
+                  <p className="text-sm font-bold text-gray-800 truncate">{data.subject || '...'}</p>
                 </div>
               </div>
 
@@ -641,29 +599,11 @@ const App = () => {
                   )}
                 </div>
               </div>
-
-              <div className="space-y-2 pt-4 border-t border-gray-50">
-                <div className="flex items-center gap-2">
-                  <ListTodo className="w-3 h-3 text-indigo-600" />
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Tasks</label>
-                </div>
-                <div className="space-y-1">
-                  {data.tasks.filter(t => t.trim()).length > 0 ? (
-                    data.tasks.filter(t => t.trim()).map((t, i) => (
-                      <p key={i} className={`text-[11px] font-medium leading-tight border-l-2 pl-2 py-0.5 border-gray-100 text-gray-600`}>
-                        {t}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-[11px] italic text-gray-300">None added yet</p>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-gray-50/30">
           <div className="max-w-4xl mx-auto px-6 py-12">
             <div className="min-h-[450px]">{renderStepContent()}</div>
             {step < 8 && (
@@ -674,7 +614,7 @@ const App = () => {
                 <button 
                   onClick={nextStep} 
                   disabled={(step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)}
-                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-opacity ${((step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all ${((step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                 >
                   {step === 7 ? 'Finalize Blueprint' : 'Next Step'}
                   <ArrowRight className="w-4 h-4" />
