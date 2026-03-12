@@ -545,7 +545,7 @@ const App = () => {
         
         const getPolicyText = () => {
           if (data.assessmentType === 'AI-Free') {
-            return `This is an AI-FREE ASSESSMENT. The use of AI is prohibited. It is critical that you are able to do this unaided by AI, since this provides evidence of the following Course Learning Outcomes: ${outcomesList || '[CLOs]'}.\n\nTo ensure your personal performance: ${data.integrityProvisions || '[Implementation details]'}`;
+            return `This is an AI-FREE ASSESSMENT. The use of AI is prohibited. It is critical that students are able to do this unaided by AI, since this provides evidence of the following Course Learning Outcomes: ${outcomesList || '[CLOs]'}.\n\nTo ensure your performance: ${data.integrityProvisions || '[Implementation details]'}`;
           }
           if (data.assessmentType === 'AI-Assisted') {
             const tasksString = formatListWithAnd(auxiliaryTasks);
