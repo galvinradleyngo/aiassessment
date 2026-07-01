@@ -826,7 +826,7 @@ const App = () => {
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
               <BrainCircuit className="w-5 h-5 text-white" />
             </div>
-            <span className="font-extrabold text-sm sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-Adaptive Studio</span>
+            <span className="font-extrabold text-sm sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-Responsive Studio</span>
           </div>
         </div>
         <div className="h-1.5 w-24 sm:w-48 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
