@@ -677,7 +677,7 @@ const App = () => {
                 <div className="flex justify-between items-start">
                   <div className="max-w-[70%]">
                     <p className="text-xs font-black uppercase tracking-widest opacity-80">Design Artifact</p>
-                    <h4 className="text-xl font-bold leading-tight mt-1">AI-Adaptive Blueprint</h4>
+                    <h4 className="text-xl font-bold leading-tight mt-1">AI-Responsive Blueprint</h4>
                     <p className="text-sm font-bold opacity-90 mt-1">{data.courseName || 'Course'}: {data.subject || 'Assessment'}</p>
                   </div>
                   <div className="bg-white/20 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border border-white/30 text-center">
