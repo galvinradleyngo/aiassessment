@@ -553,7 +553,8 @@ const App = () => {
                 <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Original Tasks</p>
                 <div className="grid gap-2">
                     {data.tasks.filter(t => t.trim()).map((t, i) => {
-                    const isAiFree = data.assessmentType === 'AI-Free';
+                    const assessmentType = (data.assessmentType || '').trim().toLowerCase();
+                    const isAiFree = assessmentType === 'ai-free';
                     const isCore = isAiFree || (isAssisted ? data.essentialTaskIndices.includes(i) : false);
                         const isIntegratedMode = data.assessmentType === 'AI-Integrated';
                         return (
@@ -715,7 +716,8 @@ const App = () => {
                             </li>
                           ))
                         : data.tasks.filter(t => t.trim()).map((t, i) => {
-                            const isEssential = data.assessmentType === 'AI-Free' || data.essentialTaskIndices.includes(i);
+                            const assessmentType = (data.assessmentType || '').trim().toLowerCase();
+                            const isEssential = assessmentType === 'ai-free' || data.essentialTaskIndices.includes(i);
                             return (
                               <li key={i} className="flex items-start justify-between text-sm font-semibold text-gray-700 bg-gray-50/50 p-2 rounded-lg border border-gray-100 gap-2">
                                 <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">{t}</span>
