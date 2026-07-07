@@ -672,17 +672,6 @@ const App = () => {
                 />
               </div>
 
-              {isAssisted && (
-                <div className="space-y-4 pt-6 border-t border-gray-100">
-                  <p className="text-sm font-bold text-gray-700">Strategy for Critical Engagement:</p>
-                  <textarea 
-                    className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-100"
-                    placeholder="How will students prove they thought critically about the AI output? (e.g., 'Students must submit a track-changes document showing where they manually corrected AI-generated errors')..."
-                    value={data.criticalEngagement}
-                    onChange={(e) => updateData('criticalEngagement', e.target.value)}
-                  />
-                </div>
-              )}
             </div>
           </div>
         );
@@ -732,6 +721,17 @@ const App = () => {
                   </label>
                 );
               })}
+            </div>
+
+            <div className="space-y-2 pt-4 border-t border-gray-100">
+              <p className="text-sm font-bold text-gray-700">Strategy for Critical Engagement</p>
+              <p className="text-sm text-gray-500">describe how AI literacy skills will be practiced here</p>
+              <textarea
+                className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                placeholder="How will students demonstrate critical engagement while practicing the selected AI literacy skills?"
+                value={data.criticalEngagement}
+                onChange={(e) => updateData('criticalEngagement', e.target.value)}
+              />
             </div>
           </div>
         );
