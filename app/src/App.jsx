@@ -34,6 +34,44 @@ import {
 const html2canvasScript = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
 const jsPdfScript = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
 
+const AI_LITERACY_SKILLS = [
+  {
+    id: 'Understanding AI Fundamentals',
+    title: 'Understanding AI Fundamentals',
+    description: 'Understand foundational knowledge of how AI systems are trained, how they operate, and where they are typically applied.'
+  },
+  {
+    id: 'AI Output Evaluation',
+    title: 'AI Output Evaluation',
+    description: 'Critically analyse, verify, and improve AI-generated content (e.g., accuracy, relevance, appropriateness).'
+  },
+  {
+    id: 'Input Design and Information Quality',
+    title: 'Input Design and Information Quality',
+    description: 'Critically design, structure, and refine inputs (e.g. prompts and datasets) to improve the accuracy, relevance, and creativity of AI-generated outputs.'
+  },
+  {
+    id: 'AI Bias & Limitation Awareness',
+    title: 'AI Bias & Limitation Awareness',
+    description: 'Identify potential biases, reliability issues, and limitations of AI tools, and apply strategies to mitigate them.'
+  },
+  {
+    id: 'AI Integration & Application',
+    title: 'AI Integration & Application',
+    description: 'Effectively use AI tools to address domain-specific tasks, support problem-solving, and enhance workflow efficiency.'
+  },
+  {
+    id: 'AI Ethics & Responsible Use',
+    title: 'AI Ethics & Responsible Use',
+    description: 'Understand and apply ethical principles and consider issues such as fairness, privacy, transparency, and accountability in AI use.'
+  },
+  {
+    id: 'AI Reflection & Metacognition',
+    title: 'AI Reflection & Metacognition',
+    description: "Reflect on AI's role in the thinking, learning, or creating process, including its impact on decision-making and understanding."
+  }
+];
+
 const App = () => {
   const [step, setStep] = useState(1);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => (
@@ -57,6 +95,7 @@ const App = () => {
       { task: '', usage: 'AI Expected' },
       { task: '', usage: 'AI Expected' }
     ],
+    aiLiteracySkills: [],
   });
 
   const blueprintRef = useRef(null);
@@ -119,7 +158,7 @@ const App = () => {
   };
 
   const nextStep = () => {
-    if (step >= 8) return;
+    if (step >= 9) return;
     setStep(prev => prev + 1);
   };
   
@@ -130,7 +169,7 @@ const App = () => {
     const handleKeyDown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-          if (step < 8 && step !== 5 && step !== 6 && step !== 7) {
+          if (step < 9 && step !== 5 && step !== 6 && step !== 7 && step !== 8) {
             e.preventDefault();
             nextStep();
           }
@@ -212,6 +251,18 @@ const App = () => {
     const lastItem = items[items.length - 1];
     const otherItems = items.slice(0, items.length - 1);
     return `${otherItems.join(", ")} and ${lastItem}`;
+  };
+
+  const toggleAiLiteracySkill = (skillId) => {
+    setData((prev) => {
+      const isSelected = prev.aiLiteracySkills.includes(skillId);
+      return {
+        ...prev,
+        aiLiteracySkills: isSelected
+          ? prev.aiLiteracySkills.filter((id) => id !== skillId)
+          : [...prev.aiLiteracySkills, skillId]
+      };
+    });
   };
 
   const renderStepContent = () => {
@@ -636,11 +687,61 @@ const App = () => {
           </div>
         );
       case 8:
+        const requiresAiLiteracy = ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType);
+
+        if (!requiresAiLiteracy) {
+          return (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 8: AI Literacy Skills</label>
+                <h3 className="text-2xl font-bold text-gray-900">Not Required For This Assessment Type</h3>
+              </div>
+              <div className="p-5 rounded-2xl border border-gray-200 bg-white text-sm text-gray-600">
+                AI literacy checklist is required only for AI-Assisted and AI-Integrated assessments.
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 8: AI Literacy Skills</label>
+              <h3 className="text-2xl font-bold text-gray-900">Tick Relevant DEC AI Literacy Skills</h3>
+              <p className="text-sm text-gray-500">Check all AI literacy skills assessed in this AI-Assisted or AI-Integrated assessment.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {AI_LITERACY_SKILLS.map((skill) => {
+                const isSelected = data.aiLiteracySkills.includes(skill.id);
+                return (
+                  <label
+                    key={skill.id}
+                    className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition-all ${isSelected ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 bg-white hover:border-indigo-200'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleAiLiteracySkill(skill.id)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-400"
+                    />
+                    <span className="space-y-1">
+                      <span className="block text-sm font-bold text-gray-900">{skill.title}</span>
+                      <span className="block text-sm text-gray-600 leading-relaxed">{skill.description}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        );
+      case 9:
         const theme = getThemeColor();
         const outcomesList = data.learningOutcomes.filter(o => o.trim()).join("; ");
         const essentialTasks = data.essentialTaskIndices.map(i => data.tasks[i]);
         const auxiliaryTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
         const redesignedTasksForBlueprint = (data.redesignedTasks || []).filter((item) => item.task.trim());
+        const selectedAiLiteracySkills = AI_LITERACY_SKILLS.filter((skill) => data.aiLiteracySkills.includes(skill.id));
         
         const getPolicyText = () => {
           if (data.assessmentType === 'AI-Free') {
@@ -749,6 +850,26 @@ const App = () => {
                     {getPolicyText()}
                   </div>
                 </div>
+
+                {['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && (
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
+                    <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">DEC AI Literacy Skills Assessed</p>
+                    {selectedAiLiteracySkills.length > 0 ? (
+                      <ul className="space-y-2">
+                        {selectedAiLiteracySkills.map((skill) => (
+                          <li key={skill.id} className="text-sm text-gray-700 leading-relaxed flex gap-2">
+                            <CheckCircle2 className={`w-3 h-3 mt-1 flex-shrink-0 ${theme.text}`} />
+                            <span>
+                              <span className="font-semibold">{skill.title}:</span> {skill.description}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">No AI literacy skills selected.</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -833,7 +954,7 @@ const App = () => {
           </div>
         </div>
         <div className="h-1.5 w-24 sm:w-48 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
-          <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(step / 8) * 100}%` }} />
+          <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(step / 9) * 100}%` }} />
         </div>
       </nav>
 
@@ -858,17 +979,17 @@ const App = () => {
         <main className="flex-1 overflow-y-auto bg-gray-50/30">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             <div className="min-h-[450px]">{renderStepContent()}</div>
-            {step < 8 && (
+            {step < 9 && (
               <div className="mt-12 flex items-center justify-between pt-8 border-t border-gray-100">
                 <button onClick={prevStep} disabled={step === 1} className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${step === 1 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-gray-900'}`}>
                   Back
                 </button>
                 <button 
                   onClick={nextStep} 
-                  disabled={(step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)}
-                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all ${((step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                  disabled={(step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype) || (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0)}
+                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all ${((step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype) || (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                 >
-                  {step === 7 ? 'Finalize Blueprint' : 'Next Step'}
+                  {step === 8 ? 'Finalize Blueprint' : 'Next Step'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
