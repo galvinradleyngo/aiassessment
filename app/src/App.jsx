@@ -159,10 +159,21 @@ const App = () => {
 
   const nextStep = () => {
     if (step >= 9) return;
+    if (data.assessmentType === 'AI-Free' && step === 7) {
+      setStep(9);
+      return;
+    }
     setStep(prev => prev + 1);
   };
   
-  const prevStep = () => setStep(prev => prev - 1);
+  const prevStep = () => {
+    if (step <= 1) return;
+    if (data.assessmentType === 'AI-Free' && step === 9) {
+      setStep(7);
+      return;
+    }
+    setStep(prev => prev - 1);
+  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -179,6 +190,13 @@ const App = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [step, data]);
+
+  // AI-Free workflow does not use Step 8.
+  useEffect(() => {
+    if (data.assessmentType === 'AI-Free' && step === 8) {
+      setStep(9);
+    }
+  }, [data.assessmentType, step]);
 
   // Load export libraries for image/PDF output.
   useEffect(() => {
@@ -611,9 +629,9 @@ const App = () => {
                         return (
                             <div key={i} className="flex items-center gap-2 text-sm font-bold py-1 border-b border-gray-100 last:border-0">
                                 {isIntegratedMode ? (
-                                    <div className="flex items-center gap-2 text-emerald-600">
-                                        <Zap className="w-3 h-3" />
-                                        <span>[Augmented]</span>
+                              <div className="flex items-center gap-2 text-amber-600">
+                                <Lock className="w-3 h-3" />
+                                <span>[Human Only]</span>
                                     </div>
                                 ) : isCore ? (
                                     <div className="flex items-center gap-2 text-amber-600">
@@ -679,17 +697,7 @@ const App = () => {
         const requiresAiLiteracy = ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType);
 
         if (!requiresAiLiteracy) {
-          return (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 8: AI Literacy Skills</label>
-                <h3 className="text-2xl font-bold text-gray-900">Not Required For This Assessment Type</h3>
-              </div>
-              <div className="p-5 rounded-2xl border border-gray-200 bg-white text-sm text-gray-600">
-                AI literacy checklist is required only for AI-Assisted and AI-Integrated assessments.
-              </div>
-            </div>
-          );
+          return null;
         }
 
         return (
@@ -939,6 +947,16 @@ const App = () => {
   );
   };
 
+  const isAiFreeWorkflow = data.assessmentType === 'AI-Free';
+  const totalSteps = isAiFreeWorkflow ? 8 : 9;
+  const progressStep = isAiFreeWorkflow && step === 9 ? 8 : step;
+  const isFinalInputStep = isAiFreeWorkflow ? step === 7 : step === 8;
+  const isNextDisabled =
+    (step === 5 && !data.assessmentType) ||
+    (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') ||
+    (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype) ||
+    (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0);
+
   return (
     <div className="min-h-screen bg-[#FBFBFD] text-[#1D1D1F] font-sans flex flex-col">
       <nav className="h-16 border-b border-gray-200 bg-white sticky top-0 z-50 px-3 sm:px-6 flex items-center justify-between w-full shadow-sm gap-3">
@@ -954,7 +972,7 @@ const App = () => {
           </div>
         </div>
         <div className="h-1.5 w-24 sm:w-48 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
-          <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(step / 9) * 100}%` }} />
+          <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(progressStep / totalSteps) * 100}%` }} />
         </div>
       </nav>
 
@@ -986,10 +1004,10 @@ const App = () => {
                 </button>
                 <button 
                   onClick={nextStep} 
-                  disabled={(step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype) || (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0)}
-                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all ${((step === 5 && !data.assessmentType) || (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') || (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype) || (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                  disabled={isNextDisabled}
+                  className={`flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all ${isNextDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                 >
-                  {step === 8 ? 'Finalize Blueprint' : 'Next Step'}
+                  {isFinalInputStep ? 'Finalize Blueprint' : 'Next Step'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
