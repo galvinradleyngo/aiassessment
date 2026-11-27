@@ -228,14 +228,41 @@ const App = () => {
     });
   };
 
+  const safeFileName = (ext) => {
+    const base = String(data.subject || 'Assessment')
+      .replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/[. ]+$/g, '')
+      .slice(0, 60) || 'Assessment';
+    return `Blueprint-${base}.${ext}`;
+  };
+
+  const saveCanvasAsPng = (canvas) => {
+    const triggerDownload = (url, revoke) => {
+      const link = document.createElement('a');
+      link.download = safeFileName('png');
+      link.href = url;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      if (revoke) setTimeout(() => URL.revokeObjectURL(url), 10000);
+    };
+    if (canvas.toBlob) {
+      canvas.toBlob((blob) => {
+        if (blob) triggerDownload(URL.createObjectURL(blob), true);
+      }, 'image/png');
+    } else {
+      triggerDownload(canvas.toDataURL('image/png'), false);
+    }
+  };
+
   const downloadImage = async () => {
     const canvas = await captureBlueprintCanvas();
     if (!canvas) return;
 
-    const link = document.createElement('a');
-    link.download = `Blueprint-${data.subject || 'Assessment'}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    saveCanvasAsPng(canvas);
   };
 
   const downloadPdf = async () => {
@@ -253,7 +280,7 @@ const App = () => {
     });
 
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
-    pdf.save(`Blueprint-${data.subject || 'Assessment'}.pdf`);
+    pdf.save(safeFileName('pdf'));
   };
 
   const getThemeColor = () => {
