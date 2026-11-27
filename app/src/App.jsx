@@ -31,8 +31,6 @@ import {
   Unlock
 } from 'lucide-react';
 
-const html2canvasScript = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-const jsPdfScript = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
 
 const AI_LITERACY_SKILLS = [
   {
@@ -204,29 +202,12 @@ const App = () => {
     }
   }, [data.assessmentType, step]);
 
-  // Load export libraries for image/PDF output.
-  useEffect(() => {
-    const scripts = [html2canvasScript, jsPdfScript].map((src) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      document.head.appendChild(script);
-      return script;
-    });
-
-    return () => {
-      scripts.forEach((script) => {
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      });
-    };
-  }, []);
-
   const captureBlueprintCanvas = async () => {
-    if (!blueprintRef.current || !window.html2canvas) return null;
+    if (!blueprintRef.current) return null;
 
-    return window.html2canvas(blueprintRef.current, {
+    // Bundled with the app (loaded on demand) so saving works on networks that block CDNs.
+    const { default: html2canvas } = await import('html2canvas');
+    return html2canvas(blueprintRef.current, {
       scale: 2,
       useCORS: true,
       logging: false,
@@ -272,12 +253,10 @@ const App = () => {
   };
 
   const downloadPdf = async () => {
-    if (!window.jspdf?.jsPDF) return;
-
     const canvas = await captureBlueprintCanvas();
     if (!canvas) return;
 
-    const { jsPDF } = window.jspdf;
+    const { jsPDF } = await import('jspdf');
     const orientation = canvas.width >= canvas.height ? 'landscape' : 'portrait';
     const pdf = new jsPDF({
       orientation,
@@ -285,7 +264,7 @@ const App = () => {
       format: [canvas.width, canvas.height]
     });
 
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
     pdf.save(safeFileName('pdf'));
   };
 
@@ -370,7 +349,7 @@ const App = () => {
               {data.learningOutcomes.map((outcome, index) => (
                 <div key={index} className="flex gap-2 group">
                   <input 
-                    className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    className="flex-1 min-w-0 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
                     placeholder={`Outcome ${index + 1}...`}
                     value={outcome}
                     onChange={(e) => handleOutcomeChange(index, e.target.value)}
@@ -401,7 +380,7 @@ const App = () => {
               {data.tasks.map((task, index) => (
                 <div key={index} className="flex gap-2 group">
                   <input 
-                    className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    className="flex-1 min-w-0 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
                     placeholder={`Task ${index + 1}...`}
                     value={task}
                     onChange={(e) => handleTaskChange(index, e.target.value)}
@@ -623,7 +602,7 @@ const App = () => {
                       <div key={index} className="rounded-xl border border-emerald-100 bg-white p-3 space-y-3">
                         <div className="flex gap-2 items-start">
                           <input
-                            className="flex-1 p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 text-sm"
+                            className="flex-1 min-w-0 p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 text-sm"
                             placeholder={`Redesigned task ${index + 1}...`}
                             value={item.task}
                             onChange={(e) => handleRedesignedTaskChange(index, e.target.value)}
@@ -676,24 +655,24 @@ const App = () => {
                     const isCore = isAiFree || (isAssisted ? data.essentialTaskIndices.includes(i) : false);
                         const isIntegratedMode = data.assessmentType === 'AI-Integrated';
                         return (
-                            <div key={i} className="flex items-center gap-2 text-sm font-bold py-1 border-b border-gray-100 last:border-0">
+                            <div key={i} className="flex items-start gap-2 text-sm font-bold py-1 border-b border-gray-100 last:border-0">
                                 {isIntegratedMode ? (
-                              <div className="flex items-center gap-2 text-amber-600">
+                              <div className="flex items-center gap-2 text-amber-600 flex-shrink-0 whitespace-nowrap">
                                 <Lock className="w-3 h-3" />
                                 <span>[Human Only]</span>
                                     </div>
                                 ) : isCore ? (
-                                    <div className="flex items-center gap-2 text-amber-600">
+                                    <div className="flex items-center gap-2 text-amber-600 flex-shrink-0 whitespace-nowrap">
                                         <Lock className="w-3 h-3" />
                                     <span>[Human Only]</span>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-2 text-emerald-500">
+                                    <div className="flex items-center gap-2 text-emerald-500 flex-shrink-0 whitespace-nowrap">
                                         <Unlock className="w-3 h-3" />
                                         <span>[AI Permitted]</span>
                                     </div>
                                 )}
-                                <span className="text-gray-700 truncate">{t}</span>
+                                <span className="text-gray-700 min-w-0 break-words">{t}</span>
                             </div>
                         )
                     })}
@@ -1093,7 +1072,8 @@ const App = () => {
         <div role="note" className="shrink-0 flex items-start gap-3 bg-amber-50 border-b border-amber-200 px-4 sm:px-6 py-2 text-xs text-amber-900 leading-relaxed">
           <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
           <p className="flex-1">
-            <strong>Your data stays on your device.</strong> Nothing you enter is saved to or sent to our platform, and it is not kept after you leave. <strong>If you refresh or close this page, your entries will be lost</strong> — save your blueprint as an image or PDF before you do.
+            <strong>Your data stays on your device.</strong>
+            <span className="hidden sm:inline"> Nothing you enter is saved to or sent to our platform, and it is not kept after you leave.</span> <strong>If you refresh or close this page, your entries will be lost</strong><span className="sm:hidden">.</span><span className="hidden sm:inline"> — save your blueprint as an image or PDF before you do.</span><span className="sm:hidden"> Save as image or PDF first.</span>
           </p>
           <button type="button" onClick={() => setShowPrivacyNote(false)} className="font-bold text-amber-700 hover:text-amber-900 whitespace-nowrap">Dismiss</button>
         </div>
