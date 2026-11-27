@@ -290,6 +290,12 @@ const App = () => {
     return { border: 'border-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-700', banner: 'bg-indigo-600', accent: 'indigo' };
   };
 
+  const endWithPeriod = (text) => {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return trimmed;
+    return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+  };
+
   const formatListWithAnd = (items) => {
     if (items.length === 0) return "";
     if (items.length === 1) return items[0];
@@ -317,8 +323,8 @@ const App = () => {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 1</label>
-              <h3 className="text-2xl font-bold text-gray-900">Course Identification</h3>
-              <p className="text-sm text-gray-500">Enter the name of the course for this redesign.</p>
+              <h3 className="text-2xl font-bold text-gray-900">Course/Subject Area Identification</h3>
+              <p className="text-sm text-gray-500">Enter the name of the course/subject area for this redesign.</p>
             </div>
             <input 
               autoFocus
@@ -352,7 +358,7 @@ const App = () => {
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 3</label>
               <h3 className="text-2xl font-bold text-gray-900">Learning Outcomes</h3>
-              <p className="text-sm text-gray-500">List the specific CLOs this assessment provides evidence for.</p>
+              <p className="text-sm text-gray-500">List the specific CLOs/Learning Outcomes this assessment provides evidence for.</p>
             </div>
             <div className="space-y-3">
               {data.learningOutcomes.map((outcome, index) => (
@@ -382,7 +388,8 @@ const App = () => {
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 4</label>
               <h3 className="text-2xl font-bold text-gray-900">Task Breakdown</h3>
-              <p className="text-sm text-gray-500">List the tasks required to complete the assessment.</p>
+              <p className="text-sm text-gray-500">Identify the sub-set tasks a student performs to complete the assessment.</p>
+              <p className="text-xs text-gray-400 italic">ex. Reflection Essay — 1. Brainstorm an idea based on questions, 2. Create an outline, 3. Write a draft, 4. Submit the draft, 5. Review feedback, 6. Rewrite.</p>
             </div>
             <div className="space-y-3">
               {data.tasks.map((task, index) => (
@@ -439,14 +446,17 @@ const App = () => {
               {[
                 { 
                   id: 'AI-Free', icon: <ShieldAlert className="w-6 h-6" />, title: 'AI-Free', guide: "Do students apply the intended outcomes in all these tasks?",
+                  detail: "If yes, all tasks will need to be performed by students unaided by AI.",
                   color: 'border-rose-200 hover:border-rose-400 bg-rose-50/50', activeColor: 'border-rose-600 bg-rose-600 text-white'
                 },
                 { 
                   id: 'AI-Assisted', icon: <Zap className="w-6 h-6" />, title: 'AI-Assisted', guide: "Do students apply the intended outcomes in some tasks but not all?",
+                  detail: "Look for tasks that lead to the product but where students don't directly apply the learning outcomes — these \"adjacent tasks\" are where AI use can be permitted.",
                   color: 'border-amber-200 hover:border-amber-400 bg-amber-50/50', activeColor: 'border-amber-600 bg-amber-600 text-white'
                 },
                 { 
                   id: 'AI-Integrated', icon: <BrainCircuit className="w-6 h-6" />, title: 'AI-Integrated', guide: "Is AI already integrated in the professional field or authentic situations where the learning outcomes are applied?",
+                  detail: "In real, non-academic situations, is AI already part of how these tasks get done — has it changed the way professionals perform them?",
                   color: 'border-emerald-200 hover:border-emerald-400 bg-emerald-50/50', activeColor: 'border-emerald-600 bg-emerald-600 text-white'
                 }
               ].map((p) => (
@@ -458,6 +468,7 @@ const App = () => {
                   <div className="mb-4">{p.icon}</div>
                   <h4 className="font-bold text-base mb-2">{p.title}</h4>
                   <p className="text-sm leading-relaxed font-medium opacity-90">{p.guide}</p>
+                  <p className="text-xs leading-relaxed mt-2 opacity-75">{p.detail}</p>
                 </button>
               ))}
             </div>
@@ -480,8 +491,8 @@ const App = () => {
               <div className="grid grid-cols-1 gap-4">
                 {[
                   { id: 'Proctoring', title: 'Supervised Work', desc: 'Students perform the assessment on-site with direct supervision.' },
-                  { id: 'Validation (Oral/Viva)', title: 'Present/defend', desc: 'Students defend their work to verify authorship.' },
-                  { id: 'Documentation', title: 'Document the process', desc: 'Students submit documentary evidence of their work process.' }
+                  { id: 'Validation (Oral/Viva)', title: 'Present/Defend the Work', desc: 'Students defend their work to verify authorship.' },
+                  { id: 'Documentation', title: 'Document the Process', desc: 'Students submit documentary evidence of their work process.' }
                 ].map(strategy => (
                   <button 
                     key={strategy.id}
@@ -511,7 +522,7 @@ const App = () => {
                   <Search className={`w-6 h-6 ${data.integratedSubtype === 'ObjectOfStudy' ? 'text-emerald-600' : 'text-gray-400'}`} />
                   <div>
                     <h4 className="font-bold text-gray-900">AI as Object of Study</h4>
-                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">AI use is prevalent in the field; CLOs require students to analyze and evaluate AI's role.</p>
+                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">AI use is prevalent in the field; CLOs/Learning Outcomes require students to analyze and evaluate AI's role.</p>
                   </div>
                 </button>
                 <button
@@ -521,7 +532,7 @@ const App = () => {
                   <Users className={`w-6 h-6 ${data.integratedSubtype === 'Collaborator' ? 'text-emerald-600' : 'text-gray-400'}`} />
                   <div>
                     <h4 className="font-bold text-gray-900">AI as Collaborator</h4>
-                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">AI is weaved into the professional workflow of performing job-critical tasks.</p>
+                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">AI is woven into the professional workflow of performing job-critical tasks.</p>
                   </div>
                 </button>
               </div>
@@ -544,7 +555,7 @@ const App = () => {
             <div className="space-y-2">
               <label className="text-xs font-bold text-amber-600 uppercase tracking-widest">Step 6: Task Alignment</label>
               <h3 className="text-2xl font-bold text-gray-900">Select Core Human Tasks</h3>
-              <p className="text-sm text-gray-500">Select the tasks where students <strong>must</strong> apply the CLOs without AI assistance.</p>
+              <p className="text-sm text-gray-500">Select the tasks where students <strong>must</strong> apply the CLOs/Learning Outcomes without AI assistance.</p>
             </div>
             <div className="grid grid-cols-1 gap-3">
               {data.tasks.map((task, index) => task.trim() && (
@@ -585,7 +596,7 @@ const App = () => {
                     <p className="text-sm font-bold text-emerald-900">{integrationTypeLabel}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-emerald-700">Specific Focus Of This Integration</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-emerald-700">Specific Focus of This Integration</p>
                     <p className="text-sm text-emerald-900 whitespace-pre-wrap break-words">
                       {data.integrationFocus?.trim() || 'No specific focus entered yet.'}
                     </p>
@@ -691,19 +702,20 @@ const App = () => {
               )}
 
               <div className="space-y-4">
-                <p className="text-sm font-bold text-gray-700">Select verification strategy:</p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <p className="text-sm font-bold text-gray-700">Select verification strategy for human only tasks:</p>
+                <div className="grid grid-cols-1 gap-3">
                   {[
-                    { id: 'Proctoring', title: 'Supervised Work' },
-                    { id: 'Validation (Oral/Viva)', title: 'Present/defend' },
-                    { id: 'Documentation', title: 'Document the process' }
+                    { id: 'Proctoring', title: 'Supervised Work', desc: 'Students perform the assessment on-site with direct supervision.' },
+                    { id: 'Validation (Oral/Viva)', title: 'Present/Defend the Work', desc: 'Students defend their work to verify authorship.' },
+                    { id: 'Documentation', title: 'Document the Process', desc: 'Students submit documentary evidence of their work process.' }
                   ].map(strategy => (
                     <button 
                       key={strategy.id}
                       onClick={() => updateData('humanCompetencyStrategy', strategy.id)}
-                      className={`p-3 rounded-xl border-2 text-center transition-all ${data.humanCompetencyStrategy === strategy.id ? `border-${themeStep7.accent}-600 bg-${themeStep7.accent}-50 text-${themeStep7.accent}-700 shadow-sm` : 'border-gray-100 bg-white hover:border-gray-200 text-gray-500'}`}
+                      className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-1 ${data.humanCompetencyStrategy === strategy.id ? `border-${themeStep7.accent}-600 bg-${themeStep7.accent}-50 shadow-sm` : 'border-gray-100 bg-white hover:border-gray-200'}`}
                     >
-                      <span className="text-sm font-bold">{strategy.title}</span>
+                      <span className={`text-sm font-bold ${data.humanCompetencyStrategy === strategy.id ? `text-${themeStep7.accent}-700` : 'text-gray-700'}`}>{strategy.title}</span>
+                      <span className="text-sm text-gray-500">{strategy.desc}</span>
                     </button>
                   ))}
                 </div>
@@ -731,7 +743,7 @@ const App = () => {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Step 8: AI Literacy Skills</label>
-              <h3 className="text-2xl font-bold text-gray-900">Tick Relevant DEC AI Literacy Skills</h3>
+              <h3 className="text-2xl font-bold text-gray-900">Check Relevant DEC AI Literacy Skills</h3>
               <p className="text-sm text-gray-500">Check all AI literacy skills assessed in this AI-Assisted or AI-Integrated assessment.</p>
             </div>
 
@@ -760,7 +772,7 @@ const App = () => {
 
             <div className="space-y-2 pt-4 border-t border-gray-100">
               <p className="text-sm font-bold text-gray-700">Strategy for Critical Engagement</p>
-              <p className="text-sm text-gray-500">describe how AI literacy skills will be practiced here</p>
+              <p className="text-sm text-gray-500">Describe how AI literacy skills will be practiced here.</p>
               <textarea
                 className="w-full h-24 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100"
                 placeholder="How will students demonstrate critical engagement while practicing the selected AI literacy skills?"
@@ -780,14 +792,14 @@ const App = () => {
         
         const getPolicyText = () => {
           if (data.assessmentType === 'AI-Free') {
-            return `This is an AI-FREE ASSESSMENT. The use of AI is prohibited. It is critical that you are able to do this unaided by AI, since this provides evidence of the following Course Learning Outcomes: ${outcomesList || '[CLOs]'}.\n\nTo ensure your personal performance: ${data.integrityProvisions || '[Implementation details]'}`;
+            return `This is an AI-FREE ASSESSMENT. The use of AI is prohibited. It is critical that you are able to do this unaided by AI, since this provides evidence of the following Course Learning Outcomes: ${outcomesList || '[CLOs]'}.\n\nTo ensure your personal performance: ${endWithPeriod(data.integrityProvisions || '[Implementation details]')}`;
           }
           if (data.assessmentType === 'AI-Assisted') {
             const tasksString = formatListWithAnd(auxiliaryTasks);
             const coreTasksNames = formatListWithAnd(essentialTasks);
-            return `This is an AI-ASSISTED ASSESSMENT. You are allowed to use AI to: ${tasksString || '[tasks]'}. However, the use of AI is strictly prohibited for the following core tasks: ${coreTasksNames || '[tasks]'}.\n\nYour independent performance of these core tasks will be verified as follows: ${data.integrityProvisions || '[Implementation details]'}. ${data.criticalEngagement ? `\n\nYou are also expected to demonstrate critical engagement with AI outputs: ${data.criticalEngagement}` : ''}`;
+            return `This is an AI-ASSISTED ASSESSMENT. You are allowed to use AI for the following tasks: ${tasksString || '[tasks]'}. However, the use of AI is strictly prohibited for the following core tasks: ${coreTasksNames || '[tasks]'}.\n\nYour independent performance of these core tasks will be verified as follows: ${endWithPeriod(data.integrityProvisions || '[Implementation details]')}${data.criticalEngagement ? `\n\nYou are also expected to demonstrate critical engagement with AI outputs: ${data.criticalEngagement}` : ''}`;
           }
-          return `This is an AI-INTEGRATED ASSESSMENT. AI use is expected. To demonstrate Course Learning Outcomes, you must provide the following accountability evidence: ${data.submissionRequirements}. \n\nTo ensure critical engagement with AI: ${data.integrityProvisions}. ${data.criticalEngagement ? `\n\nRequirement for critical engagement: ${data.criticalEngagement}` : ''}`;
+          return `This is an AI-INTEGRATED ASSESSMENT. AI use is expected. To demonstrate Course Learning Outcomes, you must provide the following accountability evidence: ${endWithPeriod(data.submissionRequirements || '[Accountability evidence]')}\n\nTo ensure critical engagement with AI: ${endWithPeriod(data.integrityProvisions || '[Implementation details]')}${data.criticalEngagement ? `\n\nRequirement for critical engagement: ${data.criticalEngagement}` : ''}`;
         };
 
         return (
@@ -816,7 +828,7 @@ const App = () => {
                   <div className="max-w-[70%]">
                     <p className="text-xs font-black uppercase tracking-widest opacity-80">Design Artifact</p>
                     <h4 className="text-xl font-bold leading-tight mt-1">AI-Responsive Blueprint</h4>
-                    <p className="text-sm font-bold opacity-90 mt-1">{data.courseName || 'Course'}: {data.subject || 'Assessment'}</p>
+                    <p className="text-sm font-bold opacity-90 mt-1">{data.courseName || 'Course/Subject Area'}: {data.subject || 'Assessment'}</p>
                   </div>
                   <div className="bg-white/20 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border border-white/30 text-center">
                     {data.assessmentType}
@@ -838,7 +850,7 @@ const App = () => {
                     </ul>
                   </div>
                   <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
-                    <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Tasks Breakdown</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Task Breakdown</p>
                     <ul className="space-y-2">
                       {data.assessmentType === 'AI-Integrated'
                         ? redesignedTasksForBlueprint.map((item, i) => (
@@ -927,7 +939,7 @@ const App = () => {
       <div className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Course</label>
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Course/Subject Area</label>
             <p className="text-sm font-bold text-gray-800 truncate">{data.courseName || '...'}</p>
           </div>
           <div className="space-y-1">
@@ -939,7 +951,7 @@ const App = () => {
         <div className="space-y-2 pt-4 border-t border-gray-50">
           <div className="flex items-center gap-2">
             <Target className="w-3 h-3 text-indigo-600" />
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">CLOs</label>
+            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">CLOs/Learning Outcomes</label>
           </div>
           <div className="space-y-1">
             {data.learningOutcomes.filter(o => o.trim()).length > 0 ? (
@@ -985,20 +997,20 @@ const App = () => {
     (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0);
 
   return (
-    <div className="min-h-screen bg-[#FBFBFD] text-[#1D1D1F] font-sans flex flex-col">
+    <div className="h-dvh bg-[#FBFBFD] text-[#1D1D1F] font-sans flex flex-col">
       <nav className="h-16 border-b border-gray-200 bg-white sticky top-0 z-50 px-3 sm:px-6 flex items-center justify-between w-full shadow-sm gap-3">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-50 rounded-lg text-gray-400 transition-colors">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-50 rounded-lg text-gray-400 transition-colors flex-shrink-0">
             {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </button>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100 flex-shrink-0">
               <BrainCircuit className="w-5 h-5 text-white" />
             </div>
-            <span className="font-extrabold text-sm sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-RESPONSIVE STUDIO</span>
+            <span className="font-extrabold text-xs sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-RESPONSIVE STUDIO</span>
           </div>
         </div>
-        <div className="h-1.5 w-24 sm:w-48 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
+        <div className="h-1.5 w-12 sm:w-48 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
           <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(progressStep / totalSteps) * 100}%` }} />
         </div>
       </nav>
@@ -1012,7 +1024,7 @@ const App = () => {
         />
       )}
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
         <aside className={`lg:hidden fixed top-16 bottom-0 left-0 z-40 w-80 max-w-[85vw] bg-white border-r border-gray-100 transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           {renderSidebarContent()}
         </aside>
