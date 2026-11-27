@@ -1215,18 +1215,23 @@ const App = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { id: 'basic', icon: <School className="w-6 h-6" />, title: 'Basic Education', desc: 'Kindergarten to Grade 12. Includes grade level, DepEd guidance for K–3, and a pre-AI skills step for AI-free assessments.' },
-                { id: 'higher', icon: <GraduationCap className="w-6 h-6" />, title: 'Higher Education', desc: 'College and university courses. Redesign assessments around course learning outcomes.' }
+                { id: 'basic', icon: <School className="w-6 h-6" />, title: 'Basic Education', bar: 'bg-[#456ba8]', border: 'border-[#456ba8]/30 hover:border-[#456ba8] focus:ring-[#456ba8]/20', text: 'text-[#456ba8]', desc: 'Kindergarten to Grade 12. Includes grade level, DepEd guidance for K–3, and a pre-AI skills step for AI-free assessments.' },
+                { id: 'higher', icon: <GraduationCap className="w-6 h-6" />, title: 'Higher Education', bar: 'bg-indigo-600', border: 'border-indigo-600/30 hover:border-indigo-600 focus:ring-indigo-600/20', text: 'text-indigo-600', desc: 'College and university courses. Redesign assessments around course learning outcomes.' }
               ].map((option) => (
                 <button
                   key={option.id}
                   type="button"
                   onClick={() => chooseEdition(option.id)}
-                  className="p-6 rounded-3xl border-2 border-gray-100 bg-white text-left shadow-sm hover:border-indigo-400 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all flex flex-col gap-3"
+                  className={`overflow-hidden rounded-3xl border-2 bg-white text-left shadow-sm hover:shadow-md focus:outline-none focus:ring-4 transition-all flex flex-col ${option.border}`}
                 >
-                  <span className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">{option.icon}</span>
-                  <span className="text-lg font-bold text-gray-900">{option.title}</span>
-                  <span className="text-sm text-gray-500 leading-relaxed">{option.desc}</span>
+                  <span className={`px-6 py-2 text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 [&_svg]:w-4 [&_svg]:h-4 ${option.bar}`}>
+                    {option.icon}
+                    {option.title} Mode
+                  </span>
+                  <span className="p-6 flex flex-col gap-3">
+                    <span className={`text-lg font-bold ${option.text}`}>{option.title}</span>
+                    <span className="text-sm text-gray-500 leading-relaxed">{option.desc}</span>
+                  </span>
                 </button>
               ))}
             </div>
