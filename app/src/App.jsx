@@ -130,6 +130,24 @@ const App = () => {
   const blueprintRef = useRef(null);
   const mainRef = useRef(null);
   const [showPrivacyNote, setShowPrivacyNote] = useState(true);
+  const [showTasksModal, setShowTasksModal] = useState(false);
+  const tasksCloseRef = useRef(null);
+
+  // Task review pop-up: Escape closes it, and focus moves to its close button when it opens.
+  useEffect(() => {
+    if (!showTasksModal) return undefined;
+    tasksCloseRef.current?.focus();
+    const onKey = (e) => {
+      if (e.key === 'Escape') setShowTasksModal(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showTasksModal]);
+
+  // The pop-up only makes sense on the steps that refer to the tasks.
+  useEffect(() => {
+    if (step < 6 || step > 8) setShowTasksModal(false);
+  }, [step]);
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
@@ -1347,6 +1365,18 @@ const App = () => {
 
         <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50/30">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            {step >= 6 && step <= 8 && (
+              <div className="flex justify-end mb-4 -mt-2 sm:-mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowTasksModal(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-indigo-100 bg-white text-xs font-bold text-indigo-700 hover:bg-indigo-50 transition-colors"
+                >
+                  <ListTodo className="w-4 h-4" />
+                  Review tasks ({data.tasks.filter((t) => t.trim()).length})
+                </button>
+              </div>
+            )}
             <div>{renderStepContent()}</div>
             {step < 9 && (
               <div className="sticky bottom-0 z-10 mt-6 sm:mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 flex items-center justify-between border-t border-gray-100 bg-[#FAFAFC]/95 backdrop-blur">
@@ -1386,6 +1416,82 @@ const App = () => {
           </div>
         </main>
       </div>
+
+      {showTasksModal && (() => {
+        const originalTasks = data.tasks.map((task, index) => ({ task, index })).filter((item) => item.task.trim());
+        const redesigned = (data.redesignedTasks || []).filter((item) => item.task.trim());
+        const showUsage = step >= 6;
+        const badge = (human, label) => (
+          <span className={`px-2 py-0.5 text-xs font-black uppercase rounded flex-shrink-0 ${human ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>{label}</span>
+        );
+        return (
+          <div
+            className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 p-3 sm:p-6"
+            onClick={() => setShowTasksModal(false)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="review-tasks-title"
+              className="w-full max-w-lg max-h-[85dvh] overflow-y-auto rounded-3xl bg-white shadow-2xl p-5 sm:p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="review-tasks-title" className="text-lg font-black text-gray-900">Review tasks</h2>
+                  <p className="text-xs text-gray-500">{data.subject || 'Your assessment'}</p>
+                </div>
+                <button
+                  ref={tasksCloseRef}
+                  type="button"
+                  onClick={() => setShowTasksModal(false)}
+                  aria-label="Close"
+                  className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-bold text-gray-700 hover:bg-gray-200"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-black uppercase tracking-widest text-gray-400">{data.assessmentType === 'AI-Integrated' && redesigned.length > 0 ? 'Original tasks' : 'Tasks'}</p>
+                {originalTasks.length > 0 ? (
+                  <ol className="space-y-2">
+                    {originalTasks.map(({ task, index }, i) => (
+                      <li key={index} className="flex items-start justify-between gap-2 text-sm font-semibold text-gray-700 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
+                        <span className="flex gap-2 min-w-0">
+                          <span className="text-indigo-500 font-black">{i + 1}.</span>
+                          <span className="min-w-0 break-words leading-relaxed">{task}</span>
+                        </span>
+                        {showUsage && data.assessmentType === 'AI-Assisted' && badge(data.essentialTaskIndices.includes(index), data.essentialTaskIndices.includes(index) ? 'Human only' : 'AI permitted')}
+                        {showUsage && data.assessmentType === 'AI-Free' && badge(true, 'Human only')}
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="text-sm italic text-gray-400">No tasks added yet.</p>
+                )}
+              </div>
+
+              {data.assessmentType === 'AI-Integrated' && redesigned.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-black uppercase tracking-widest text-gray-400">Redesigned tasks</p>
+                  <ol className="space-y-2">
+                    {redesigned.map((item, i) => (
+                      <li key={i} className="flex items-start justify-between gap-2 text-sm font-semibold text-gray-700 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
+                        <span className="flex gap-2 min-w-0">
+                          <span className="text-emerald-600 font-black">{i + 1}.</span>
+                          <span className="min-w-0 break-words leading-relaxed">{item.task}</span>
+                        </span>
+                        {badge(item.usage === 'Human Only', item.usage)}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <footer className="sticky bottom-0 z-20 shrink-0 border-t border-gray-100 bg-white/90 backdrop-blur px-4 py-2 text-center text-xs text-gray-500">
         Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5. <span className="whitespace-nowrap">Last updated {LAST_UPDATED}.</span>
