@@ -938,7 +938,16 @@ const App = () => {
     <div className="p-6 flex-1 overflow-y-auto space-y-8 min-w-0 lg:min-w-[320px]">
       <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
         <LayoutDashboard className="w-4 h-4 text-indigo-600" />
-        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Blueprint Snapshot</span>
+        <span className="text-xs font-black uppercase tracking-widest text-gray-400 flex-1">Blueprint Snapshot</span>
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="Collapse blueprint snapshot"
+          title="Collapse"
+          className="p-1.5 -mr-1.5 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
       </div>
       
       <div className="space-y-6">
@@ -1077,8 +1086,20 @@ const App = () => {
           {renderSidebarContent()}
         </aside>
 
-        <aside className={`hidden lg:flex bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex-col overflow-hidden ${isSidebarOpen ? 'w-80' : 'w-0'}`}>
-          {renderSidebarContent()}
+        <aside className={`hidden lg:flex bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex-col overflow-hidden ${isSidebarOpen ? 'w-80' : 'w-12'}`}>
+          {isSidebarOpen ? renderSidebarContent() : (
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Expand blueprint snapshot"
+              title="Expand blueprint snapshot"
+              className="flex-1 flex flex-col items-center gap-4 pt-6 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+              <LayoutDashboard className="w-4 h-4 text-indigo-600" />
+              <span className="text-xs font-black uppercase tracking-widest [writing-mode:vertical-rl]">Blueprint Snapshot</span>
+            </button>
+          )}
         </aside>
 
         <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50/30">
