@@ -1024,6 +1024,17 @@ const App = () => {
     ...(isAiFreeWorkflow ? [] : [{ id: 8, label: 'AI Literacy' }]),
     { id: 9, label: 'Blueprint' }
   ];
+  // Steps 6+ depend on the category chosen in step 5, and step 7+ on the step 6 choice.
+  const step6Complete = !(
+    (data.assessmentType === 'AI-Free' && !data.humanCompetencyStrategy) ||
+    (data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)
+  );
+  const canReachStep = (id) => {
+    if (id <= 5) return true;
+    if (!data.assessmentType) return false;
+    if (id === 6) return true;
+    return step6Complete;
+  };
   const currentMapIndex = Math.max(0, stepMap.findIndex((item) => item.id === step));
   const isFinalInputStep = isAiFreeWorkflow ? step === 7 : step === 8;
   const isNextDisabled =
@@ -1058,13 +1069,13 @@ const App = () => {
               <li key={item.id} className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 last:flex-none">
                 <button
                   type="button"
-                  disabled={!isDone}
+                  disabled={isCurrent || !canReachStep(item.id)}
                   onClick={() => setStep(item.id)}
                   aria-current={isCurrent ? 'step' : undefined}
-                  title={item.label}
-                  className={`flex items-center gap-2 min-w-0 rounded-full ${isDone ? 'cursor-pointer' : 'cursor-default'}`}
+                  title={canReachStep(item.id) ? item.label : `${item.label} (complete the earlier steps first)`}
+                  className={`flex items-center gap-2 min-w-0 rounded-full ${!isCurrent && canReachStep(item.id) ? 'cursor-pointer' : 'cursor-default'}`}
                 >
-                  <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : canReachStep(item.id) ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-gray-100 text-gray-400'}`}>
                     {isDone ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
                   </span>
                   {isCurrent && <span className="hidden sm:block text-xs font-bold whitespace-nowrap text-indigo-700">{item.label}</span>}
