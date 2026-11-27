@@ -37,6 +37,8 @@ import {
 
 const GRADE_LEVELS = ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7 and above'];
 const K3_GRADE_LEVELS = ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3'];
+// Update this date with every change to the app.
+const LAST_UPDATED = 'November 27, 2026';
 const EDITION_STORAGE_KEY = 'aiResponsiveEdition';
 
 const AI_LITERACY_SKILLS = [
@@ -1231,7 +1233,7 @@ const App = () => {
           </div>
         </main>
         <footer className="shrink-0 border-t border-gray-100 bg-white px-4 py-2 text-center text-xs text-gray-500">
-          Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5.
+          Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5. <span className="whitespace-nowrap">Last updated {LAST_UPDATED}.</span>
         </footer>
       </div>
     );
@@ -1360,7 +1362,7 @@ const App = () => {
       </div>
 
       <footer className="sticky bottom-0 z-20 shrink-0 border-t border-gray-100 bg-white/90 backdrop-blur px-4 py-2 text-center text-xs text-gray-500">
-        Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5.
+        Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5. <span className="whitespace-nowrap">Last updated {LAST_UPDATED}.</span>
       </footer>
     </div>
   );
