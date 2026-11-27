@@ -609,7 +609,7 @@ const App = () => {
             <div className="flex items-start gap-3 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/60 text-sm text-indigo-900 leading-relaxed">
               <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-500" />
               <p>
-                <strong>Pedagogical note:</strong> Consider which of the tasks bear desirable difficulties that lead to the identified learning outcomes, and tasks which are adjacent - necessary steps towards the product but are not inferences of learning the outcomes.
+                <strong>Pedagogical note:</strong> Consider which of the tasks bear desirable difficulties that lead to the identified learning outcomes, and tasks which are adjacent - necessary steps towards the product but are not evidence of learning the outcomes.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3">
@@ -930,27 +930,13 @@ const App = () => {
             const coreTasksNames = formatListWithAnd(essentialTasks);
             return `This is an AI-ASSISTED ASSESSMENT. You are allowed to use AI for the following tasks: ${tasksString || '[tasks]'}. However, the use of AI is strictly prohibited for the following core tasks: ${coreTasksNames || '[tasks]'}.\n\nYour independent performance of these core tasks will be verified as follows: ${endWithPeriod(data.integrityProvisions || '[Implementation details]')}${data.criticalEngagement ? `\n\nYou are also expected to demonstrate critical engagement with AI outputs through the following: ${data.criticalEngagement}` : ''}`;
           }
-          return `This is an AI-INTEGRATED ASSESSMENT. AI use is expected. To demonstrate Course Learning Outcomes, you must provide the following accountability evidence: ${endWithPeriod(data.submissionRequirements || '[Accountability evidence]')}\n\nTo ensure critical engagement with AI: ${endWithPeriod(data.integrityProvisions || '[Implementation details]')}${data.criticalEngagement ? `\n\nRequirement for critical engagement: ${data.criticalEngagement}` : ''}`;
+          return `This is an AI-INTEGRATED ASSESSMENT. AI use is expected. To demonstrate Course Learning Outcomes, you must provide the following accountability evidence: ${endWithPeriod(data.submissionRequirements || '[Accountability evidence]')}\n\nTo ensure critical engagement with AI: ${endWithPeriod(data.integrityProvisions || '[Implementation details]')}${data.criticalEngagement ? `\n\nYou are also expected to demonstrate critical engagement with AI outputs through the following: ${data.criticalEngagement}` : ''}`;
         };
 
         return (
-          <div className="space-y-8 animate-in zoom-in-95 duration-500 pb-20">
+          <div className="space-y-8 animate-in zoom-in-95 duration-500 pb-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-2xl font-black text-gray-900 tracking-tight">Final Blueprint</h3>
-              <div className="flex flex-wrap items-center gap-2">
-                <button onClick={prevStep} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 whitespace-nowrap">
-                  <ChevronLeft className="w-4 h-4" /> Back
-                </button>
-                <button onClick={() => setStep(1)} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-200 whitespace-nowrap">
-                  <RotateCcw className="w-4 h-4" /> Restart
-                </button>
-                <button onClick={downloadImage} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-indigo-700 transition-colors whitespace-nowrap">
-                  <Download className="w-4 h-4" /> Save Image
-                </button>
-                <button onClick={downloadPdf} className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-black transition-colors whitespace-nowrap">
-                  <Download className="w-4 h-4" /> Save PDF
-                </button>
-              </div>
             </div>
 
             <div ref={blueprintRef} className={`bg-white border-2 ${theme.border} rounded-[2rem] overflow-hidden shadow-2xl`}>
@@ -1375,6 +1361,26 @@ const App = () => {
                   {isFinalInputStep ? 'Finalize Blueprint' : 'Next Step'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
+              </div>
+            )}
+            {step === 9 && (
+              <div className="sticky bottom-0 z-10 mt-6 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 flex items-center justify-between gap-2 border-t border-gray-100 bg-[#FAFAFC]/95 backdrop-blur">
+                <div className="flex items-center gap-2">
+                  <button onClick={prevStep} aria-label="Back" title="Back" className="flex items-center gap-2 p-2.5 sm:px-4 sm:py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 whitespace-nowrap">
+                    <ChevronLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
+                  </button>
+                  <button onClick={() => setStep(1)} aria-label="Restart" title="Restart" className="flex items-center gap-2 p-2.5 sm:px-4 sm:py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-200 whitespace-nowrap">
+                    <RotateCcw className="w-4 h-4" /> <span className="hidden sm:inline">Restart</span>
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={downloadImage} aria-label="Save Image" className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                    <Download className="w-4 h-4" /> <span className="sm:hidden">Image</span><span className="hidden sm:inline">Save Image</span>
+                  </button>
+                  <button onClick={downloadPdf} aria-label="Save PDF" className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 bg-gray-900 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-black transition-colors whitespace-nowrap">
+                    <Download className="w-4 h-4" /> <span className="sm:hidden">PDF</span><span className="hidden sm:inline">Save PDF</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
