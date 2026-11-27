@@ -1042,6 +1042,10 @@ const App = () => {
           </div>
         </main>
       </div>
+
+      <footer className="sticky bottom-0 z-20 shrink-0 border-t border-gray-100 bg-white/90 backdrop-blur px-4 py-2 text-center text-xs text-gray-500">
+        Designed by the Ateneo SALT Institute, with the help of Claude Sonnett 5.5.
+      </footer>
     </div>
   );
 };
