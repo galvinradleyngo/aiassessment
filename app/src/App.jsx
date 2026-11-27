@@ -100,6 +100,7 @@ const App = () => {
 
   const blueprintRef = useRef(null);
   const mainRef = useRef(null);
+  const [showPrivacyNote, setShowPrivacyNote] = useState(true);
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
@@ -240,7 +241,7 @@ const App = () => {
       .trim()
       .replace(/[. ]+$/g, '')
       .slice(0, 60) || 'Assessment';
-    return `Blueprint-${base}.${ext}`;
+    return `${base}-AI Responsive Blueprint.${ext}`;
   };
 
   const saveCanvasAsPng = (canvas) => {
@@ -1076,6 +1077,16 @@ const App = () => {
           })}
         </ol>
       </div>
+
+      {showPrivacyNote && (
+        <div role="note" className="shrink-0 flex items-start gap-3 bg-amber-50 border-b border-amber-200 px-4 sm:px-6 py-2 text-xs text-amber-900 leading-relaxed">
+          <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
+          <p className="flex-1">
+            <strong>Your data stays on your device.</strong> Nothing you enter is saved to or sent to our platform, and it is not kept after you leave. <strong>If you refresh or close this page, your entries will be lost</strong> — save your blueprint as an image or PDF before you do.
+          </p>
+          <button type="button" onClick={() => setShowPrivacyNote(false)} className="font-bold text-amber-700 hover:text-amber-900 whitespace-nowrap">Dismiss</button>
+        </div>
+      )}
 
       {isSidebarOpen && (
         <button
