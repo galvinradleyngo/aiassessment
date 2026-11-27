@@ -606,6 +606,12 @@ const App = () => {
               <h3 className="text-2xl font-bold text-gray-900">Select Core Human Tasks</h3>
               <p className="text-sm text-gray-500">Select the tasks where students <strong>must</strong> apply the CLOs/Learning Outcomes without AI assistance.</p>
             </div>
+            <div className="flex items-start gap-3 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/60 text-sm text-indigo-900 leading-relaxed">
+              <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-500" />
+              <p>
+                <strong>Pedagogical note:</strong> Consider which of the tasks bear desirable difficulties that lead to the identified learning outcomes, and tasks which are adjacent - necessary steps towards the product but are not inferences of learning the outcomes.
+              </p>
+            </div>
             <div className="grid grid-cols-1 gap-3">
               {data.tasks.map((task, index) => task.trim() && (
                 <button
@@ -1289,14 +1295,14 @@ const App = () => {
             const isCurrent = index === currentMapIndex;
             const isDone = index < currentMapIndex;
             return (
-              <li key={item.id} className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 last:flex-none">
+              <li key={item.id} className={`flex items-center gap-1 sm:gap-2 last:flex-none ${isCurrent ? 'flex-1 min-w-fit' : 'flex-1 min-w-0'}`}>
                 <button
                   type="button"
                   disabled={isCurrent || !canReachStep(item.id)}
                   onClick={() => setStep(item.id)}
                   aria-current={isCurrent ? 'step' : undefined}
                   title={canReachStep(item.id) ? item.label : `${item.label} (complete the earlier steps first)`}
-                  className={`flex items-center gap-2 min-w-0 rounded-full ${!isCurrent && canReachStep(item.id) ? 'cursor-pointer' : 'cursor-default'}`}
+                  className={`flex items-center gap-2 flex-shrink-0 rounded-full ${!isCurrent && canReachStep(item.id) ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : canReachStep(item.id) ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-gray-100 text-gray-400'}`}>
                     {isDone ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
