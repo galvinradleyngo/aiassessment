@@ -31,8 +31,6 @@ import {
   Unlock
 } from 'lucide-react';
 
-const html2canvasScript = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-const jsPdfScript = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
 
 const AI_LITERACY_SKILLS = [
   {
@@ -100,6 +98,7 @@ const App = () => {
 
   const blueprintRef = useRef(null);
   const mainRef = useRef(null);
+  const [showPrivacyNote, setShowPrivacyNote] = useState(true);
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
@@ -203,29 +202,12 @@ const App = () => {
     }
   }, [data.assessmentType, step]);
 
-  // Load export libraries for image/PDF output.
-  useEffect(() => {
-    const scripts = [html2canvasScript, jsPdfScript].map((src) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      document.head.appendChild(script);
-      return script;
-    });
-
-    return () => {
-      scripts.forEach((script) => {
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      });
-    };
-  }, []);
-
   const captureBlueprintCanvas = async () => {
-    if (!blueprintRef.current || !window.html2canvas) return null;
+    if (!blueprintRef.current) return null;
 
-    return window.html2canvas(blueprintRef.current, {
+    // Bundled with the app (loaded on demand) so saving works on networks that block CDNs.
+    const { default: html2canvas } = await import('html2canvas');
+    return html2canvas(blueprintRef.current, {
       scale: 2,
       useCORS: true,
       logging: false,
@@ -240,7 +222,7 @@ const App = () => {
       .trim()
       .replace(/[. ]+$/g, '')
       .slice(0, 60) || 'Assessment';
-    return `Blueprint-${base}.${ext}`;
+    return `${base}-AI Responsive Blueprint.${ext}`;
   };
 
   const saveCanvasAsPng = (canvas) => {
@@ -271,12 +253,10 @@ const App = () => {
   };
 
   const downloadPdf = async () => {
-    if (!window.jspdf?.jsPDF) return;
-
     const canvas = await captureBlueprintCanvas();
     if (!canvas) return;
 
-    const { jsPDF } = window.jspdf;
+    const { jsPDF } = await import('jspdf');
     const orientation = canvas.width >= canvas.height ? 'landscape' : 'portrait';
     const pdf = new jsPDF({
       orientation,
@@ -284,7 +264,7 @@ const App = () => {
       format: [canvas.width, canvas.height]
     });
 
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
     pdf.save(safeFileName('pdf'));
   };
 
@@ -369,7 +349,7 @@ const App = () => {
               {data.learningOutcomes.map((outcome, index) => (
                 <div key={index} className="flex gap-2 group">
                   <input 
-                    className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    className="flex-1 min-w-0 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
                     placeholder={`Outcome ${index + 1}...`}
                     value={outcome}
                     onChange={(e) => handleOutcomeChange(index, e.target.value)}
@@ -400,7 +380,7 @@ const App = () => {
               {data.tasks.map((task, index) => (
                 <div key={index} className="flex gap-2 group">
                   <input 
-                    className="flex-1 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    className="flex-1 min-w-0 p-4 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100"
                     placeholder={`Task ${index + 1}...`}
                     value={task}
                     onChange={(e) => handleTaskChange(index, e.target.value)}
@@ -570,7 +550,12 @@ const App = () => {
                   className={`p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${data.essentialTaskIndices.includes(index) ? 'border-amber-600 bg-amber-50 shadow-sm shadow-amber-100' : 'border-gray-100 bg-white hover:border-amber-200'}`}
                 >
                   <span className="text-sm font-bold">{task}</span>
-                  {data.essentialTaskIndices.includes(index) && <CheckCircle2 className="w-4 h-4 text-amber-600" />}
+                  {data.essentialTaskIndices.includes(index) && (
+                    <span className="flex items-center gap-2 flex-shrink-0 ml-3">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Human only</span>
+                      <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -617,7 +602,7 @@ const App = () => {
                       <div key={index} className="rounded-xl border border-emerald-100 bg-white p-3 space-y-3">
                         <div className="flex gap-2 items-start">
                           <input
-                            className="flex-1 p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 text-sm"
+                            className="flex-1 min-w-0 p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 text-sm"
                             placeholder={`Redesigned task ${index + 1}...`}
                             value={item.task}
                             onChange={(e) => handleRedesignedTaskChange(index, e.target.value)}
@@ -670,24 +655,24 @@ const App = () => {
                     const isCore = isAiFree || (isAssisted ? data.essentialTaskIndices.includes(i) : false);
                         const isIntegratedMode = data.assessmentType === 'AI-Integrated';
                         return (
-                            <div key={i} className="flex items-center gap-2 text-sm font-bold py-1 border-b border-gray-100 last:border-0">
+                            <div key={i} className="flex items-start gap-2 text-sm font-bold py-1 border-b border-gray-100 last:border-0">
                                 {isIntegratedMode ? (
-                              <div className="flex items-center gap-2 text-amber-600">
+                              <div className="flex items-center gap-2 text-amber-600 flex-shrink-0 whitespace-nowrap">
                                 <Lock className="w-3 h-3" />
                                 <span>[Human Only]</span>
                                     </div>
                                 ) : isCore ? (
-                                    <div className="flex items-center gap-2 text-amber-600">
+                                    <div className="flex items-center gap-2 text-amber-600 flex-shrink-0 whitespace-nowrap">
                                         <Lock className="w-3 h-3" />
                                     <span>[Human Only]</span>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-2 text-emerald-500">
+                                    <div className="flex items-center gap-2 text-emerald-500 flex-shrink-0 whitespace-nowrap">
                                         <Unlock className="w-3 h-3" />
                                         <span>[AI Permitted]</span>
                                     </div>
                                 )}
-                                <span className="text-gray-700 truncate">{t}</span>
+                                <span className="text-gray-700 min-w-0 break-words">{t}</span>
                             </div>
                         )
                     })}
@@ -938,7 +923,16 @@ const App = () => {
     <div className="p-6 flex-1 overflow-y-auto space-y-8 min-w-0 lg:min-w-[320px]">
       <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
         <LayoutDashboard className="w-4 h-4 text-indigo-600" />
-        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Blueprint Snapshot</span>
+        <span className="text-xs font-black uppercase tracking-widest text-gray-400 flex-1">Blueprint Snapshot</span>
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="Collapse blueprint snapshot"
+          title="Collapse"
+          className="p-1.5 -mr-1.5 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
       </div>
       
       <div className="space-y-6">
@@ -1009,6 +1003,17 @@ const App = () => {
     ...(isAiFreeWorkflow ? [] : [{ id: 8, label: 'AI Literacy' }]),
     { id: 9, label: 'Blueprint' }
   ];
+  // Steps 6+ depend on the category chosen in step 5, and step 7+ on the step 6 choice.
+  const step6Complete = !(
+    (data.assessmentType === 'AI-Free' && !data.humanCompetencyStrategy) ||
+    (data.assessmentType === 'AI-Integrated' && !data.integratedSubtype)
+  );
+  const canReachStep = (id) => {
+    if (id <= 5) return true;
+    if (!data.assessmentType) return false;
+    if (id === 6) return true;
+    return step6Complete;
+  };
   const currentMapIndex = Math.max(0, stepMap.findIndex((item) => item.id === step));
   const isFinalInputStep = isAiFreeWorkflow ? step === 7 : step === 8;
   const isNextDisabled =
@@ -1043,13 +1048,13 @@ const App = () => {
               <li key={item.id} className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 last:flex-none">
                 <button
                   type="button"
-                  disabled={!isDone}
+                  disabled={isCurrent || !canReachStep(item.id)}
                   onClick={() => setStep(item.id)}
                   aria-current={isCurrent ? 'step' : undefined}
-                  title={item.label}
-                  className={`flex items-center gap-2 min-w-0 rounded-full ${isDone ? 'cursor-pointer' : 'cursor-default'}`}
+                  title={canReachStep(item.id) ? item.label : `${item.label} (complete the earlier steps first)`}
+                  className={`flex items-center gap-2 min-w-0 rounded-full ${!isCurrent && canReachStep(item.id) ? 'cursor-pointer' : 'cursor-default'}`}
                 >
-                  <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : canReachStep(item.id) ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-gray-100 text-gray-400'}`}>
                     {isDone ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
                   </span>
                   {isCurrent && <span className="hidden sm:block text-xs font-bold whitespace-nowrap text-indigo-700">{item.label}</span>}
@@ -1062,6 +1067,17 @@ const App = () => {
           })}
         </ol>
       </div>
+
+      {showPrivacyNote && (
+        <div role="note" className="shrink-0 flex items-start gap-3 bg-amber-50 border-b border-amber-200 px-4 sm:px-6 py-2 text-xs text-amber-900 leading-relaxed">
+          <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
+          <p className="flex-1">
+            <strong>Your data stays on your device.</strong>
+            <span className="hidden sm:inline"> Nothing you enter is saved to or sent to our platform, and it is not kept after you leave.</span> <strong>If you refresh or close this page, your entries will be lost</strong><span className="sm:hidden">.</span><span className="hidden sm:inline"> — save your blueprint as an image or PDF before you do.</span><span className="sm:hidden"> Save as image or PDF first.</span>
+          </p>
+          <button type="button" onClick={() => setShowPrivacyNote(false)} className="font-bold text-amber-700 hover:text-amber-900 whitespace-nowrap">Dismiss</button>
+        </div>
+      )}
 
       {isSidebarOpen && (
         <button
@@ -1077,8 +1093,20 @@ const App = () => {
           {renderSidebarContent()}
         </aside>
 
-        <aside className={`hidden lg:flex bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex-col overflow-hidden ${isSidebarOpen ? 'w-80' : 'w-0'}`}>
-          {renderSidebarContent()}
+        <aside className={`hidden lg:flex bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex-col overflow-hidden ${isSidebarOpen ? 'w-80' : 'w-12'}`}>
+          {isSidebarOpen ? renderSidebarContent() : (
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Expand blueprint snapshot"
+              title="Expand blueprint snapshot"
+              className="flex-1 flex flex-col items-center gap-4 pt-6 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+              <LayoutDashboard className="w-4 h-4 text-indigo-600" />
+              <span className="text-xs font-black uppercase tracking-widest [writing-mode:vertical-rl]">Blueprint Snapshot</span>
+            </button>
+          )}
         </aside>
 
         <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50/30">
@@ -1104,7 +1132,7 @@ const App = () => {
       </div>
 
       <footer className="sticky bottom-0 z-20 shrink-0 border-t border-gray-100 bg-white/90 backdrop-blur px-4 py-2 text-center text-xs text-gray-500">
-        Designed by the Ateneo SALT Institute, with the help of Claude Sonnett 5.5.
+        Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5.
       </footer>
     </div>
   );
