@@ -99,6 +99,11 @@ const App = () => {
   });
 
   const blueprintRef = useRef(null);
+  const mainRef = useRef(null);
+
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [step]);
 
   const updateData = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
@@ -988,7 +993,23 @@ const App = () => {
 
   const isAiFreeWorkflow = data.assessmentType === 'AI-Free';
   const totalSteps = isAiFreeWorkflow ? 8 : 9;
-  const progressStep = isAiFreeWorkflow && step === 9 ? 8 : step;
+  const step6Label = {
+    'AI-Free': 'Verification',
+    'AI-Assisted': 'Core Tasks',
+    'AI-Integrated': 'Integration'
+  }[data.assessmentType] || 'Approach';
+  const stepMap = [
+    { id: 1, label: 'Course' },
+    { id: 2, label: 'Title' },
+    { id: 3, label: 'Outcomes' },
+    { id: 4, label: 'Tasks' },
+    { id: 5, label: 'Category' },
+    { id: 6, label: step6Label },
+    { id: 7, label: 'Safeguards' },
+    ...(isAiFreeWorkflow ? [] : [{ id: 8, label: 'AI Literacy' }]),
+    { id: 9, label: 'Blueprint' }
+  ];
+  const currentMapIndex = Math.max(0, stepMap.findIndex((item) => item.id === step));
   const isFinalInputStep = isAiFreeWorkflow ? step === 7 : step === 8;
   const isNextDisabled =
     (step === 5 && !data.assessmentType) ||
@@ -1004,16 +1025,43 @@ const App = () => {
             {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </button>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100 flex-shrink-0">
-              <BrainCircuit className="w-5 h-5 text-white" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-9 h-9 flex-shrink-0" />
             <span className="font-extrabold text-xs sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-RESPONSIVE STUDIO</span>
           </div>
         </div>
-        <div className="h-1.5 w-12 sm:w-48 bg-gray-100 rounded-full overflow-hidden flex-shrink-0">
-          <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(progressStep / totalSteps) * 100}%` }} />
-        </div>
       </nav>
+
+      <div className="shrink-0 bg-white border-b border-gray-100 px-4 sm:px-6 py-3">
+        <p className="sm:hidden text-xs font-bold text-indigo-600 mb-2">
+          Step {currentMapIndex + 1} of {stepMap.length} · {stepMap[currentMapIndex].label}
+        </p>
+        <ol className="flex items-center gap-1 sm:gap-2 max-w-4xl mx-auto" aria-label="Progress">
+          {stepMap.map((item, index) => {
+            const isCurrent = index === currentMapIndex;
+            const isDone = index < currentMapIndex;
+            return (
+              <li key={item.id} className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 last:flex-none">
+                <button
+                  type="button"
+                  disabled={!isDone}
+                  onClick={() => setStep(item.id)}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  title={item.label}
+                  className={`flex items-center gap-2 min-w-0 rounded-full ${isDone ? 'cursor-pointer' : 'cursor-default'}`}
+                >
+                  <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                    {isDone ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
+                  </span>
+                  {isCurrent && <span className="hidden sm:block text-xs font-bold whitespace-nowrap text-indigo-700">{item.label}</span>}
+                </button>
+                {index < stepMap.length - 1 && (
+                  <span className={`flex-1 h-0.5 rounded-full min-w-2 ${isDone ? 'bg-indigo-500' : 'bg-gray-100'}`} />
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
 
       {isSidebarOpen && (
         <button
@@ -1033,7 +1081,7 @@ const App = () => {
           {renderSidebarContent()}
         </aside>
 
-        <main className="flex-1 overflow-y-auto bg-gray-50/30">
+        <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50/30">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             <div className="min-h-[450px]">{renderStepContent()}</div>
             {step < 9 && (
