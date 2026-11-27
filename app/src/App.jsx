@@ -1250,7 +1250,7 @@ const App = () => {
             <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-9 h-9 flex-shrink-0" />
             <span className="flex flex-col min-w-0 uppercase leading-none">
               <span className="font-black text-base min-[360px]:text-lg sm:text-2xl tracking-tight text-indigo-950 whitespace-nowrap">AI Responsive</span>
-              <span className="mt-0.5 text-[9px] sm:text-xs font-bold tracking-wider text-indigo-600 truncate">Assessment Design Studio<span className="hidden md:inline text-indigo-400"> · {isBasicEd ? 'Basic Ed' : 'Higher Ed'} Edition</span></span>
+              <span className="mt-0.5 text-[9px] sm:text-xs font-bold tracking-wider text-indigo-600 truncate">Assessment Design Studio</span>
             </span>
           </div>
         </div>
@@ -1265,6 +1265,15 @@ const App = () => {
           <span className="hidden min-[360px]:inline"><span className="hidden sm:inline">Switch to </span>{isBasicEd ? 'Higher Ed' : 'Basic Ed'}</span>
         </button>
       </nav>
+
+      <div
+        role="status"
+        className={`shrink-0 flex items-center justify-center gap-2 px-4 py-1.5 text-white text-[11px] sm:text-xs font-black uppercase tracking-widest ${isBasicEd ? 'bg-[#456ba8]' : 'bg-indigo-600'}`}
+      >
+        {isBasicEd ? <School className="w-4 h-4 flex-shrink-0" /> : <GraduationCap className="w-4 h-4 flex-shrink-0" />}
+        <span>{isBasicEd ? 'Basic Education Mode' : 'Higher Education Mode'}</span>
+        <span className="hidden sm:inline font-bold normal-case tracking-normal opacity-80">· {isBasicEd ? 'Kindergarten to Grade 12' : 'College and university'}</span>
+      </div>
 
       <div className="shrink-0 bg-white border-b border-gray-100 px-4 sm:px-6 py-3">
         <p className="sm:hidden text-xs font-bold text-indigo-600 mb-2">
