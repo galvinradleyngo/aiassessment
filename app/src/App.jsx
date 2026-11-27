@@ -570,7 +570,12 @@ const App = () => {
                   className={`p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${data.essentialTaskIndices.includes(index) ? 'border-amber-600 bg-amber-50 shadow-sm shadow-amber-100' : 'border-gray-100 bg-white hover:border-amber-200'}`}
                 >
                   <span className="text-sm font-bold">{task}</span>
-                  {data.essentialTaskIndices.includes(index) && <CheckCircle2 className="w-4 h-4 text-amber-600" />}
+                  {data.essentialTaskIndices.includes(index) && (
+                    <span className="flex items-center gap-2 flex-shrink-0 ml-3">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Human only</span>
+                      <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
