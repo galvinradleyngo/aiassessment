@@ -606,6 +606,12 @@ const App = () => {
               <h3 className="text-2xl font-bold text-gray-900">Select Core Human Tasks</h3>
               <p className="text-sm text-gray-500">Select the tasks where students <strong>must</strong> apply the CLOs/Learning Outcomes without AI assistance.</p>
             </div>
+            <div className="flex items-start gap-3 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/60 text-sm text-indigo-900 leading-relaxed">
+              <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-500" />
+              <p>
+                <strong>Pedagogical note:</strong> Consider which of the tasks bear desirable difficulties that lead to the identified learning outcomes, and tasks which are adjacent - necessary steps towards the product but are not inferences of learning the outcomes.
+              </p>
+            </div>
             <div className="grid grid-cols-1 gap-3">
               {data.tasks.map((task, index) => task.trim() && (
                 <button
