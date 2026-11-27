@@ -28,9 +28,18 @@ import {
   Search,
   ListTodo,
   Lock,
-  Unlock
+  Unlock,
+  Repeat,
+  GraduationCap,
+  School
 } from 'lucide-react';
 
+
+const GRADE_LEVELS = ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7 and above'];
+const K3_GRADE_LEVELS = ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3'];
+// Update this date with every change to the app.
+const LAST_UPDATED = 'November 27, 2026';
+const EDITION_STORAGE_KEY = 'aiResponsiveEdition';
 
 const AI_LITERACY_SKILLS = [
   {
@@ -72,11 +81,30 @@ const AI_LITERACY_SKILLS = [
 
 const App = () => {
   const [step, setStep] = useState(1);
+  // Edition (basic or higher ed). Only this preference is remembered on the device, never the entries.
+  const [edition, setEdition] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem(EDITION_STORAGE_KEY);
+      return saved === 'basic' || saved === 'higher' ? saved : null;
+    } catch {
+      return null;
+    }
+  });
+  const isBasicEd = edition === 'basic';
+  const chooseEdition = (value) => {
+    setEdition(value);
+    try {
+      window.localStorage.setItem(EDITION_STORAGE_KEY, value);
+    } catch {
+      // Storage unavailable (private mode, blocked): the choice just applies to this visit.
+    }
+  };
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => (
     typeof window === 'undefined' ? true : window.innerWidth >= 1024
   ));
   const [data, setData] = useState({
     courseName: '',
+    gradeLevel: '',
     subject: '',
     learningOutcomes: ['', ''], 
     tasks: ['', '', '', ''], 
@@ -94,6 +122,9 @@ const App = () => {
       { task: '', usage: 'AI Expected' }
     ],
     aiLiteracySkills: [],
+    preAiSkillsDeveloped: '',
+    preAiLiteracySkills: [],
+    preAiSkillsExplanation: '',
   });
 
   const blueprintRef = useRef(null);
@@ -163,7 +194,7 @@ const App = () => {
 
   const nextStep = () => {
     if (step >= 9) return;
-    if (data.assessmentType === 'AI-Free' && step === 7) {
+    if (!isBasicEd && data.assessmentType === 'AI-Free' && step === 7) {
       setStep(9);
       return;
     }
@@ -172,7 +203,7 @@ const App = () => {
   
   const prevStep = () => {
     if (step <= 1) return;
-    if (data.assessmentType === 'AI-Free' && step === 9) {
+    if (!isBasicEd && data.assessmentType === 'AI-Free' && step === 9) {
       setStep(7);
       return;
     }
@@ -195,12 +226,12 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [step, data]);
 
-  // AI-Free workflow does not use Step 8.
+  // The higher ed AI-Free workflow does not use Step 8 (the basic ed one uses it for Pre-AI skills).
   useEffect(() => {
-    if (data.assessmentType === 'AI-Free' && step === 8) {
+    if (!isBasicEd && data.assessmentType === 'AI-Free' && step === 8) {
       setStep(9);
     }
-  }, [data.assessmentType, step]);
+  }, [data.assessmentType, step, isBasicEd]);
 
   const captureBlueprintCanvas = async () => {
     if (!blueprintRef.current) return null;
@@ -301,6 +332,18 @@ const App = () => {
     });
   };
 
+  const togglePreAiLiteracySkill = (skillId) => {
+    setData((prev) => {
+      const isSelected = prev.preAiLiteracySkills.includes(skillId);
+      return {
+        ...prev,
+        preAiLiteracySkills: isSelected
+          ? prev.preAiLiteracySkills.filter((id) => id !== skillId)
+          : [...prev.preAiLiteracySkills, skillId]
+      };
+    });
+  };
+
   const renderStepContent = () => {
     switch(step) {
       case 1:
@@ -318,6 +361,21 @@ const App = () => {
               value={data.courseName}
               onChange={(e) => updateData('courseName', e.target.value)}
             />
+            {isBasicEd && (
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Grade Level</label>
+                <select
+                  className="w-full p-4 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-100 transition-all text-sm"
+                  value={data.gradeLevel}
+                  onChange={(e) => updateData('gradeLevel', e.target.value)}
+                >
+                  <option value="">Select grade level...</option>
+                  {GRADE_LEVELS.map((level) => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         );
       case 2:
@@ -426,6 +484,12 @@ const App = () => {
                 )}
               </div>
             </div>
+
+            {isBasicEd && K3_GRADE_LEVELS.includes(data.gradeLevel) && (
+              <div className="p-4 rounded-2xl border border-rose-200 bg-rose-50 text-sm text-rose-800">
+                <strong>Note:</strong> Based on DepEd guidance, assessments for {data.gradeLevel} ought to be AI-Free.
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
@@ -723,6 +787,76 @@ const App = () => {
           </div>
         );
       case 8:
+        if (data.assessmentType === 'AI-Free' && isBasicEd) {
+          return (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-rose-600 uppercase tracking-widest">Step 8: Pre-AI Skills</label>
+                <h3 className="text-2xl font-bold text-gray-900">Are there Pre-AI skills that might be developed in this assessment?</h3>
+                <p className="text-sm text-gray-500">Pre-AI skills are foundational human competencies (e.g., critical thinking, reasoning) that can transfer into AI literacy skills.</p>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => updateData('preAiSkillsDeveloped', 'yes')}
+                  className={`flex-1 p-5 rounded-2xl border-2 text-center font-bold transition-all ${data.preAiSkillsDeveloped === 'yes' ? 'border-rose-600 bg-rose-50 text-rose-700 shadow-md shadow-rose-100' : 'border-gray-100 bg-white text-gray-500 hover:border-rose-200'}`}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateData('preAiSkillsDeveloped', 'no')}
+                  className={`flex-1 p-5 rounded-2xl border-2 text-center font-bold transition-all ${data.preAiSkillsDeveloped === 'no' ? 'border-rose-600 bg-rose-50 text-rose-700 shadow-md shadow-rose-100' : 'border-gray-100 bg-white text-gray-500 hover:border-rose-200'}`}
+                >
+                  No
+                </button>
+              </div>
+
+              {data.preAiSkillsDeveloped === 'yes' && (
+                <div className="space-y-6 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="space-y-2">
+                    <p className="text-sm font-bold text-gray-700">Explain what pre-AI skills are developed and how</p>
+                    <textarea
+                      className="w-full h-28 p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-100"
+                      placeholder="ex. In this assessment, learners are asked to give several ways to answer the same problem — this builds critical thinking that can lead to the AI literacy skill of AI output evaluation."
+                      value={data.preAiSkillsExplanation}
+                      onChange={(e) => updateData('preAiSkillsExplanation', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <p className="text-sm font-bold text-gray-700">Which AI literacy skills do these help develop?</p>
+                    <p className="text-sm text-gray-500">Check all that apply.</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {AI_LITERACY_SKILLS.map((skill) => {
+                      const isSelected = data.preAiLiteracySkills.includes(skill.id);
+                      return (
+                        <label
+                          key={skill.id}
+                          className={`flex items-start gap-3 rounded-2xl border p-4 cursor-pointer transition-all ${isSelected ? 'border-rose-400 bg-rose-50' : 'border-gray-200 bg-white hover:border-rose-200'}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => togglePreAiLiteracySkill(skill.id)}
+                            className="mt-1 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-400"
+                          />
+                          <span className="space-y-1">
+                            <span className="block text-sm font-bold text-gray-900">{skill.title}</span>
+                            <span className="block text-sm text-gray-600 leading-relaxed">{skill.description}</span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }
+
         const requiresAiLiteracy = ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType);
 
         if (!requiresAiLiteracy) {
@@ -778,6 +912,7 @@ const App = () => {
         const essentialTasks = data.essentialTaskIndices.map(i => data.tasks[i]);
         const auxiliaryTasks = data.tasks.filter((_, i) => !data.essentialTaskIndices.includes(i) && _.trim());
         const redesignedTasksForBlueprint = (data.redesignedTasks || []).filter((item) => item.task.trim());
+        const selectedPreAiLiteracySkills = AI_LITERACY_SKILLS.filter((skill) => data.preAiLiteracySkills.includes(skill.id));
         const selectedAiLiteracySkills = AI_LITERACY_SKILLS.filter((skill) => data.aiLiteracySkills.includes(skill.id));
         
         const getPolicyText = () => {
@@ -818,7 +953,7 @@ const App = () => {
                   <div className="max-w-[70%]">
                     <p className="text-xs font-black uppercase tracking-widest opacity-80">Design Artifact</p>
                     <h4 className="text-xl font-bold leading-tight mt-1">AI-Responsive Blueprint</h4>
-                    <p className="text-sm font-bold opacity-90 mt-1">{data.courseName || 'Course/Subject Area'}: {data.subject || 'Assessment'}</p>
+                    <p className="text-sm font-bold opacity-90 mt-1">{data.courseName || 'Course/Subject Area'}{isBasicEd && data.gradeLevel ? ` (${data.gradeLevel})` : ''}: {data.subject || 'Assessment'}</p>
                   </div>
                   <div className="bg-white/20 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border border-white/30 text-center">
                     {data.assessmentType}
@@ -907,6 +1042,38 @@ const App = () => {
                     )}
                   </div>
                 )}
+
+                {data.assessmentType === 'AI-Free' && isBasicEd && (
+                  <div className={`p-5 rounded-2xl border-2 ${theme.border} bg-white`}>
+                    <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Pre-AI Skills Developed</p>
+                    {data.preAiSkillsDeveloped === 'yes' ? (
+                      <div className="space-y-4">
+                        {selectedPreAiLiteracySkills.length > 0 ? (
+                          <ul className="space-y-2">
+                            {selectedPreAiLiteracySkills.map((skill) => (
+                              <li key={skill.id} className="text-sm text-gray-700 leading-relaxed flex gap-2">
+                                <CheckCircle2 className={`w-3 h-3 mt-1 flex-shrink-0 ${theme.text}`} />
+                                <span>
+                                  <span className="font-semibold">{skill.title}:</span> {skill.description}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">No AI literacy skills selected.</p>
+                        )}
+                        {data.preAiSkillsExplanation?.trim() && (
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Explanation</p>
+                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{data.preAiSkillsExplanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">No pre-AI skills identified for this assessment.</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -941,6 +1108,12 @@ const App = () => {
             <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Course/Subject Area</label>
             <p className="text-sm font-bold text-gray-800 truncate">{data.courseName || '...'}</p>
           </div>
+          {isBasicEd && (
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Grade Level</label>
+              <p className="text-sm font-bold text-gray-800 truncate">{data.gradeLevel || '...'}</p>
+            </div>
+          )}
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Assessment</label>
             <p className="text-sm font-bold text-gray-800 truncate">{data.subject || '...'}</p>
@@ -986,7 +1159,9 @@ const App = () => {
   };
 
   const isAiFreeWorkflow = data.assessmentType === 'AI-Free';
-  const totalSteps = isAiFreeWorkflow ? 8 : 9;
+  // Higher ed AI-Free skips step 8; basic ed AI-Free uses it for Pre-AI skills.
+  const skipsStep8 = isAiFreeWorkflow && !isBasicEd;
+  const totalSteps = skipsStep8 ? 8 : 9;
   const step6Label = {
     'AI-Free': 'Verification',
     'AI-Assisted': 'Core Tasks',
@@ -1000,7 +1175,7 @@ const App = () => {
     { id: 5, label: 'Category' },
     { id: 6, label: step6Label },
     { id: 7, label: 'Safeguards' },
-    ...(isAiFreeWorkflow ? [] : [{ id: 8, label: 'AI Literacy' }]),
+    ...(skipsStep8 ? [] : [{ id: 8, label: isAiFreeWorkflow ? 'Pre-AI Skills' : 'AI Literacy' }]),
     { id: 9, label: 'Blueprint' }
   ];
   // Steps 6+ depend on the category chosen in step 5, and step 7+ on the step 6 choice.
@@ -1015,12 +1190,59 @@ const App = () => {
     return step6Complete;
   };
   const currentMapIndex = Math.max(0, stepMap.findIndex((item) => item.id === step));
-  const isFinalInputStep = isAiFreeWorkflow ? step === 7 : step === 8;
+  const isFinalInputStep = skipsStep8 ? step === 7 : step === 8;
   const isNextDisabled =
     (step === 5 && !data.assessmentType) ||
     (step === 6 && !data.humanCompetencyStrategy && data.assessmentType === 'AI-Free') ||
     (step === 6 && data.assessmentType === 'AI-Integrated' && !data.integratedSubtype) ||
-    (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0);
+    (step === 8 && ['AI-Assisted', 'AI-Integrated'].includes(data.assessmentType) && data.aiLiteracySkills.length === 0) ||
+    (step === 8 && isBasicEd && data.assessmentType === 'AI-Free' && !data.preAiSkillsDeveloped) ||
+    (step === 8 && isBasicEd && data.assessmentType === 'AI-Free' && data.preAiSkillsDeveloped === 'yes' && data.preAiLiteracySkills.length === 0);
+
+  if (!edition) {
+    return (
+      <div className="min-h-dvh bg-[#FBFBFD] text-[#1D1D1F] font-sans flex flex-col">
+        <main className="flex-1 flex items-center justify-center px-4 py-10">
+          <div className="w-full max-w-3xl space-y-8">
+            <div className="text-center space-y-3">
+              <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-20 h-20 mx-auto" />
+              <p className="uppercase leading-none">
+                <span className="block text-3xl sm:text-4xl font-black tracking-tight text-indigo-950">AI Responsive</span>
+                <span className="block mt-2 text-xs sm:text-sm font-bold tracking-widest text-indigo-600">Assessment Design Studio</span>
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Which level do you teach?</h1>
+              <p className="text-sm text-gray-500 max-w-xl mx-auto">Choose the edition that fits your learners. You can switch at any time from the header.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { id: 'basic', icon: <School className="w-6 h-6" />, title: 'Basic Education', bar: 'bg-[#456ba8]', border: 'border-[#456ba8]/30 hover:border-[#456ba8] focus:ring-[#456ba8]/20', text: 'text-[#456ba8]', desc: 'Kindergarten to Grade 12. Includes grade level, DepEd guidance for K–3, and a pre-AI skills step for AI-free assessments.' },
+                { id: 'higher', icon: <GraduationCap className="w-6 h-6" />, title: 'Higher Education', bar: 'bg-indigo-600', border: 'border-indigo-600/30 hover:border-indigo-600 focus:ring-indigo-600/20', text: 'text-indigo-600', desc: 'College and university courses. Redesign assessments around course learning outcomes.' }
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => chooseEdition(option.id)}
+                  className={`overflow-hidden rounded-3xl border-2 bg-white text-left shadow-sm hover:shadow-md focus:outline-none focus:ring-4 transition-all flex flex-col ${option.border}`}
+                >
+                  <span className={`px-6 py-2 text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 [&_svg]:w-4 [&_svg]:h-4 ${option.bar}`}>
+                    {option.icon}
+                    {option.title} Mode
+                  </span>
+                  <span className="p-6 flex flex-col gap-3">
+                    <span className={`text-lg font-bold ${option.text}`}>{option.title}</span>
+                    <span className="text-sm text-gray-500 leading-relaxed">{option.desc}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </main>
+        <footer className="shrink-0 border-t border-gray-100 bg-white px-4 py-2 text-center text-xs text-gray-500">
+          Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5. <span className="whitespace-nowrap">Last updated {LAST_UPDATED}.</span>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="h-dvh bg-[#FBFBFD] text-[#1D1D1F] font-sans flex flex-col">
@@ -1031,10 +1253,32 @@ const App = () => {
           </button>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-9 h-9 flex-shrink-0" />
-            <span className="font-extrabold text-xs sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-RESPONSIVE STUDIO</span>
+            <span className="flex flex-col min-w-0 uppercase leading-none">
+              <span className="font-black text-base min-[360px]:text-lg sm:text-2xl tracking-tight text-indigo-950 whitespace-nowrap">AI Responsive</span>
+              <span className="mt-0.5 text-[9px] sm:text-xs font-bold tracking-wider text-indigo-600 truncate">Assessment Design Studio</span>
+            </span>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={() => chooseEdition(isBasicEd ? 'higher' : 'basic')}
+          title={`Switch to ${isBasicEd ? 'Higher Ed' : 'Basic Ed'}`}
+          aria-label={`Switch to ${isBasicEd ? 'Higher Ed' : 'Basic Ed'}`}
+          className="flex items-center gap-1.5 flex-shrink-0 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-indigo-700 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+        >
+          <Repeat className="w-3.5 h-3.5" />
+          <span className="hidden min-[360px]:inline"><span className="hidden sm:inline">Switch to </span>{isBasicEd ? 'Higher Ed' : 'Basic Ed'}</span>
+        </button>
       </nav>
+
+      <div
+        role="status"
+        className={`shrink-0 flex items-center justify-center gap-2 px-4 py-1.5 text-white text-[11px] sm:text-xs font-black uppercase tracking-widest ${isBasicEd ? 'bg-[#456ba8]' : 'bg-indigo-600'}`}
+      >
+        {isBasicEd ? <School className="w-4 h-4 flex-shrink-0" /> : <GraduationCap className="w-4 h-4 flex-shrink-0" />}
+        <span>{isBasicEd ? 'Basic Education Mode' : 'Higher Education Mode'}</span>
+        <span className="hidden sm:inline font-bold normal-case tracking-normal opacity-80">· {isBasicEd ? 'Kindergarten to Grade 12' : 'College and university'}</span>
+      </div>
 
       <div className="shrink-0 bg-white border-b border-gray-100 px-4 sm:px-6 py-3">
         <p className="sm:hidden text-xs font-bold text-indigo-600 mb-2">
@@ -1132,7 +1376,7 @@ const App = () => {
       </div>
 
       <footer className="sticky bottom-0 z-20 shrink-0 border-t border-gray-100 bg-white/90 backdrop-blur px-4 py-2 text-center text-xs text-gray-500">
-        Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5.
+        Designed by the Ateneo SALT Institute, with the help of Claude Sonnet 5.5. <span className="whitespace-nowrap">Last updated {LAST_UPDATED}.</span>
       </footer>
     </div>
   );
