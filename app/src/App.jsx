@@ -1204,7 +1204,7 @@ const App = () => {
           <div className="w-full max-w-3xl space-y-8">
             <div className="text-center space-y-3">
               <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-20 h-20 mx-auto" />
-              <p className="text-xs font-black uppercase tracking-widest text-indigo-600">AI-Responsive Studio</p>
+              <p className="text-xs font-black uppercase tracking-widest text-indigo-600">AI-Responsive Assessment Studio</p>
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Which level do you teach?</h1>
               <p className="text-sm text-gray-500 max-w-xl mx-auto">Choose the edition that fits your learners. You can switch at any time from the header.</p>
             </div>
@@ -1243,7 +1243,7 @@ const App = () => {
           </button>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-9 h-9 flex-shrink-0" />
-            <span className="font-extrabold text-xs sm:text-base tracking-tight uppercase text-indigo-950 truncate">AI-RESPONSIVE STUDIO<span className="hidden md:inline font-bold text-indigo-500"> - {isBasicEd ? 'BASIC ED' : 'HIGHER ED'} EDITION</span></span>
+            <span className="font-extrabold text-xs sm:text-base leading-tight tracking-tight uppercase text-indigo-950 sm:truncate">AI-RESPONSIVE ASSESSMENT STUDIO<span className="hidden md:inline font-bold text-indigo-500"> - {isBasicEd ? 'BASIC ED' : 'HIGHER ED'} EDITION</span></span>
           </div>
         </div>
         <button
