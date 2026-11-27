@@ -1295,14 +1295,14 @@ const App = () => {
             const isCurrent = index === currentMapIndex;
             const isDone = index < currentMapIndex;
             return (
-              <li key={item.id} className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 last:flex-none">
+              <li key={item.id} className={`flex items-center gap-1 sm:gap-2 last:flex-none ${isCurrent ? 'flex-1 min-w-fit' : 'flex-1 min-w-0'}`}>
                 <button
                   type="button"
                   disabled={isCurrent || !canReachStep(item.id)}
                   onClick={() => setStep(item.id)}
                   aria-current={isCurrent ? 'step' : undefined}
                   title={canReachStep(item.id) ? item.label : `${item.label} (complete the earlier steps first)`}
-                  className={`flex items-center gap-2 min-w-0 rounded-full ${!isCurrent && canReachStep(item.id) ? 'cursor-pointer' : 'cursor-default'}`}
+                  className={`flex items-center gap-2 flex-shrink-0 rounded-full ${!isCurrent && canReachStep(item.id) ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   <span className={`w-6 h-6 flex-shrink-0 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${isCurrent ? 'bg-indigo-600 text-white ring-4 ring-indigo-100' : isDone ? 'bg-indigo-500 text-white' : canReachStep(item.id) ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-gray-100 text-gray-400'}`}>
                     {isDone ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
