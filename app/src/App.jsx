@@ -1357,7 +1357,7 @@ const App = () => {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             <div>{renderStepContent()}</div>
             {step < 9 && (
-              <div className="sticky bottom-0 z-10 mt-6 sm:mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 flex items-center justify-between border-t border-gray-100 bg-white/90 backdrop-blur">
+              <div className="sticky bottom-0 z-10 mt-6 sm:mt-8 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 flex items-center justify-between border-t border-gray-100 bg-[#FAFAFC]/95 backdrop-blur">
                 <button onClick={prevStep} disabled={step === 1} className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${step === 1 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-gray-900'}`}>
                   Back
                 </button>
