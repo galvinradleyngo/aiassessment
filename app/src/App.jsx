@@ -1204,7 +1204,10 @@ const App = () => {
           <div className="w-full max-w-3xl space-y-8">
             <div className="text-center space-y-3">
               <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-20 h-20 mx-auto" />
-              <p className="text-xs font-black uppercase tracking-widest text-indigo-600">AI Responsive Assessment Design Studio</p>
+              <p className="uppercase leading-none">
+                <span className="block text-3xl sm:text-4xl font-black tracking-tight text-indigo-950">AI Responsive</span>
+                <span className="block mt-2 text-xs sm:text-sm font-bold tracking-widest text-indigo-600">Assessment Design Studio</span>
+              </p>
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Which level do you teach?</h1>
               <p className="text-sm text-gray-500 max-w-xl mx-auto">Choose the edition that fits your learners. You can switch at any time from the header.</p>
             </div>
@@ -1243,17 +1246,21 @@ const App = () => {
           </button>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img src={`${import.meta.env.BASE_URL}salt-logo.png`} alt="Ateneo SALT Institute" className="w-9 h-9 flex-shrink-0" />
-            <span className="font-extrabold text-xs sm:text-base leading-tight tracking-tight uppercase text-indigo-950 sm:truncate">AI RESPONSIVE ASSESSMENT DESIGN STUDIO<span className="hidden md:inline font-bold text-indigo-500"> - {isBasicEd ? 'BASIC ED' : 'HIGHER ED'} EDITION</span></span>
+            <span className="flex flex-col min-w-0 uppercase leading-none">
+              <span className="font-black text-base min-[360px]:text-lg sm:text-2xl tracking-tight text-indigo-950 whitespace-nowrap">AI Responsive</span>
+              <span className="mt-0.5 text-[9px] sm:text-xs font-bold tracking-wider text-indigo-600 truncate">Assessment Design Studio<span className="hidden md:inline text-indigo-400"> · {isBasicEd ? 'Basic Ed' : 'Higher Ed'} Edition</span></span>
+            </span>
           </div>
         </div>
         <button
           type="button"
           onClick={() => chooseEdition(isBasicEd ? 'higher' : 'basic')}
           title={`Switch to ${isBasicEd ? 'Higher Ed' : 'Basic Ed'}`}
+          aria-label={`Switch to ${isBasicEd ? 'Higher Ed' : 'Basic Ed'}`}
           className="flex items-center gap-1.5 flex-shrink-0 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-indigo-700 hover:bg-indigo-50 transition-colors whitespace-nowrap"
         >
           <Repeat className="w-3.5 h-3.5" />
-          <span><span className="hidden sm:inline">Switch to </span>{isBasicEd ? 'Higher Ed' : 'Basic Ed'}</span>
+          <span className="hidden min-[360px]:inline"><span className="hidden sm:inline">Switch to </span>{isBasicEd ? 'Higher Ed' : 'Basic Ed'}</span>
         </button>
       </nav>
 
